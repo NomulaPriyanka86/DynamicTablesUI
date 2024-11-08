@@ -18,6 +18,7 @@ const PageSchema = ({ pageName }) => {
         const response = await getPageSchema(pageName);
         setSchema(response.data);
 
+        //TODO: Implement a way to fetch data from the API - for respective pageName
         // Filter sample data to include only columns that match the schema
         const filteredData = sampleData.map(row => {
           const filteredRow = {};
