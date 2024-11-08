@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
-import { fetchKycData } from '../services/apiService';
 import { Calendar } from 'primereact/calendar';
 import { FaPencilAlt } from 'react-icons/fa';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
@@ -10,10 +9,8 @@ import "primereact/resources/primereact.min.css";
 import inferValidationRule from './Form/Validations';
 import CustomPagination from './Pagination/CustomPagination';
 import HeaderControls from './HeaderControl/HeaderControls';
-import { getKycDataStore, setKycDataStore } from '../services/localStorage';
+import { setKycDataStore } from '../services/localStorage';
 import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
-import CalendarFilter from './CalenderFilter/CalenderFilter';
 import { fetchData } from '../services/getService';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { fetchUserSpins } from '../services/getUserSpins';
@@ -127,16 +124,6 @@ export default function DataDynamic() {
             setAvailableColumns(columns); // Set available columns in state
             setVisibleColumns(columns);   // Set visible columns to include all headers
 
-            // // Fetch KYC data
-            // const columnsData = await fetchUserSpins();
-            // if (!Array.isArray(columnsData)) {
-            //     console.error('Expected KYC data to be an array:', columnsData);
-            //     setKycData([]); // Set to empty array if columnsData is not valid
-            // } else {
-            //     console.log("Columns Data fetched for Headers Columns:", columnsData);
-            //     setKycData(columnsData.length > 0 ? columnsData : [{}]); // Show empty row if no data
-            // }
-
             // Initialize filters for each column
             const initialFilters = {};
             columns.forEach(column => {
@@ -197,47 +184,6 @@ export default function DataDynamic() {
             [columnName]: { ...prevFilters[columnName], value } // Update the value for the specific column
         }));
     };
-
-    // const onColumnFilterChange = (field, value) => {
-    //     setFilters((prevFilters) => ({
-    //         ...prevFilters,
-    //         [field]: { value, matchMode: 'contains' }
-    //     }));
-
-    //     setColumnFilterValues((prevValues) => ({
-    //         ...prevValues,
-    //         [field]: value
-    //     }));
-
-    //     // Reset to first page
-    //     if (dataTableRef.current) {
-    //         dataTableRef.current.filter(value, field, 'contains');
-    //     }
-    // };
-
-    // // Function to clear individual column filter
-    // const clearColumnFilter = (field) => {
-    //     // Reset the filter state for the specific column
-    //     setFilters((prevFilters) => ({
-    //         ...prevFilters,
-    //         [field]: { value: '', matchMode: 'contains' } // Resetting value to an empty string
-    //     }));
-
-    //     setColumnFilterValues((prevValues) => ({
-    //         ...prevValues,
-    //         [field]: '' // Clear the value for that column
-    //     }));
-
-    //     // Clear the DataTable filter and sorting for the specific column
-
-    //     if (dataTableRef.current) {
-    //         dataTableRef.current.reset(); // This resets sorting fields and clears filters
-    //     }
-    // };
-
-    // const calendarFilterTemplate = (options) => {
-    //     return <CalendarFilter options={options} />;
-    // };
 
     const dateFilterTemplate = (options) => {
         return <Calendar
@@ -433,12 +379,6 @@ export default function DataDynamic() {
                                             onChange={(e) => onColumnFilterChange(col.field, e.target.value)}
                                             placeholder={`Filter ${col.header}`}
                                         />
-                                        {/* <Button
-                                        icon="pi pi-times"
-                                        onClick={() => clearColumnFilter(col.field)}
-                                        className="p-button-primary" // Style the clear button
-
-                                    >clear</Button> */}
                                     </>
                                 )
                         }
