@@ -1,19 +1,19 @@
-const API_URL = "http://localhost:8081/api/v1/kyc-data";
+import axios from 'axios';
 
-export const fetchKycData = async () => {
-    try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        // console.log("Fetched KYC Data:", data); // Check the structure of the data
-        if (data.data) {
-            return data.data; // This should be an array
-        }
-        else {
-            console.error('Fetched data is not in the expected format:', data);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        return [];
-    }
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api/v1',
+});
+
+const tenantName = 'bluboy';
+
+export const getPageSchema = (pageName) => {
+  return api.get(`/page-schema/${tenantName}/${pageName}`);
+};
+
+export const getAllPageNames = () => {
+  return api.get(`/page-schema/${tenantName}`);
+};
+
+export const getAllTenants = () => {
+  return api.get('/tenants');
 };
