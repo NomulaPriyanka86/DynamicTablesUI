@@ -5,7 +5,12 @@ import React from 'react'
 
 function App() {
   return (
-    <PageSchema pageName="page1" />
+    <>
+      <PageSchema pageName="page1" />
+      <br></br>
+      <PageSchema pageName="page2" />
+    </>
+    
   )
 }
 export default App
