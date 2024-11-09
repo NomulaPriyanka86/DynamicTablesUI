@@ -1,16 +1,15 @@
 import './App.css'
 import DataDynamic from './components/DataDynamic'
+import DynamicTablesUI from './components/DynamicTablesUI'
 import PageSchema from './components/PageSchema'
 import React from 'react'
 
 function App() {
   return (
     <>
-      <PageSchema pageName="page1" />
-      <br></br>
-      <PageSchema pageName="page2" />
+      <DynamicTablesUI pageName="player" />
+      {/* <PageSchema pageName="player" /> */}
     </>
-    
   )
 }
 export default App
