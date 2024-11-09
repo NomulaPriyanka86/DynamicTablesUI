@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getPageSchema } from '../services/apiService';
 import sampleData from '../data/page1MockData.json';
+import sampleuserspinData from '../data/sampleMockData.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
 import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
@@ -48,11 +49,16 @@ const DynamicTablesUI = ({ pageName }) => {
                     const parsedRow = {};
                     schemaData.columns.forEach(col => {
                         if (row.hasOwnProperty(col.name)) {
-                            // Check if the column type is 'Date' and parse it
+                            // Check if the column type is 'Date' and format it
                             if (col.type === 'Date' && row[col.name]) {
                                 parsedRow[col.name] = new Date(row[col.name]);
                             } else {
-                                parsedRow[col.name] = row[col.name];
+                                // If the column is 'status', dynamically set the value
+                                if (col.name === 'status') {
+                                    parsedRow[col.name] = row[col.name] === 'approve' ? 'Approved' : row[col.name] === 'reject' ? 'Rejected' : row[col.name];
+                                } else {
+                                    parsedRow[col.name] = row[col.name];
+                                }
                             }
                         }
                     });

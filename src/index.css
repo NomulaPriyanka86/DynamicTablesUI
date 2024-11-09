@@ -37,9 +37,18 @@ body {
   align-items: center;
   flex-wrap: wrap; /* Allows elements to wrap in case of limited space */
 }
-.wide-column {
+/* .wide-column {
   width: 1px !important; /* Force width using !important */
+/* } */
+/* Add these styles to your CSS file */
+.wide-column {
+  background-color: #f4f4f4; /* Light background color for the header */
+  color: #333; /* Text color */
+  font-weight: bold; /* Make the header text bold */
+  text-align: center; /* Center align the header text */
+  padding: 10px; /* Add padding to the header */
 }
+
 
 .wide-column .p-column-header-content {
   white-space: nowrap; /* Prevent wrapping */
