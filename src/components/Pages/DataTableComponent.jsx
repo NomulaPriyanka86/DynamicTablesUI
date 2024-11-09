@@ -1,65 +1,59 @@
 import React, { useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { FaPencilAlt } from 'react-icons/fa'; // Pencil icon
-import { Checkbox } from 'primereact/checkbox'; // For checkboxes
-import ActionButtons from './ActionButtons'; // Import ActionButtons component
+import { FaPencilAlt } from 'react-icons/fa';
+import { Checkbox } from 'primereact/checkbox';
+import ActionButtons from './ActionButtons';
+import { ToastContainer } from 'react-toastify';
 
-export const DataTableComponent = ({ filteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit }) => {
-    const [editingCell, setEditingCell] = useState(null); // Track which cell is being edited
-    const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell
-    const [selectedRows, setSelectedRows] = useState([]); // Track selected rows
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit }) => {
+    const [editingCell, setEditingCell] = useState(null);
+    const [hoveredCell, setHoveredCell] = useState(null);
+    const [selectedRows, setSelectedRows] = useState([]);
 
-    // Toggle selection for a row
+    // Use 'id' as the unique key for each row
     const handleRowSelect = (rowData) => {
-        let newSelectedRows = [...selectedRows];
-        if (newSelectedRows.includes(rowData)) {
-            newSelectedRows = newSelectedRows.filter(row => row !== rowData); // Deselect
-        } else {
-            newSelectedRows.push(rowData); // Select
-        }
+        const newSelectedRows = selectedRows.includes(rowData.id)
+            ? selectedRows.filter(id => id !== rowData.id)  // Deselect if already selected
+            : [...selectedRows, rowData.id];  // Select if not already selected
         setSelectedRows(newSelectedRows);
     };
 
-    // Handle "Select All" checkbox
     const handleSelectAll = () => {
         if (selectedRows.length === filteredData.length) {
-            setSelectedRows([]); // Deselect all
+            setSelectedRows([]);  // Deselect all if all rows are selected
         } else {
-            setSelectedRows(filteredData); // Select all
+            setSelectedRows(filteredData.map(row => row.id));  // Select all rows by their unique 'id'
         }
     };
 
     const renderColumn = (col) => {
         const matchMode = col.type === 'Date' ? 'dateIs' : 'contains';
-
-        // Define a fixed width for each column or make it dynamic if you prefer
-        const columnWidth = '20%';  // Default width of 20% or use dynamic width based on `col.width`
+        const columnWidth = '20%';
 
         return (
             <Column
                 key={col.name}
                 field={col.name}
                 header={col.name}
-                headerClassName="wide-column" // Apply custom class to the header
+                headerClassName="wide-column"
                 sortable={true}
                 filter={true}
                 filterMatchMode={matchMode}
                 filterPlaceholder={`Search ${col.name}`}
-                style={{ textAlign: 'center', width: columnWidth }} // Fixed width for each column
+                style={{ textAlign: 'center', width: columnWidth }}
                 body={(rowData, { rowIndex }) => {
                     const value = rowData[col.name];
-                    const isEditable = col.editable; // Check if the column is editable
+                    const isEditable = col.editable;
 
-                    // Handle mouse enter and leave to track hovering over editable cells
                     const handleMouseEnter = () => {
                         if (isEditable) {
-                            setHoveredCell({ rowIndex, colName: col.name }); // Set hovered cell
+                            setHoveredCell({ rowIndex, colName: col.name });
                         }
                     };
 
                     const handleMouseLeave = () => {
-                        setHoveredCell(null); // Reset hovered cell
+                        setHoveredCell(null);
                     };
 
                     return (
@@ -74,28 +68,27 @@ export const DataTableComponent = ({ filteredData, rows, globalFilter, selectedC
                                     defaultValue={value}
                                     autoFocus
                                     onBlur={(e) => {
-                                        handleEdit(e.target.value, col.name, rowIndex); // Save edited value
-                                        setEditingCell(null); // Exit editing mode
+                                        handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                        setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleEdit(e.target.value, col.name, rowIndex); // Save on Enter
-                                            setEditingCell(null); // Exit editing mode
+                                            handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                            setEditingCell(null);
                                         }
                                     }}
                                 />
                             ) : (
                                 <>
                                     {col.type === 'Date' ? formatDate(value) : value}
-                                    {/* Display pencil icon only if cell is editable and it's hovered or in edit mode */}
                                     {isEditable && (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name || editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
                                         <FaPencilAlt
                                             style={{
                                                 cursor: 'pointer',
                                                 marginLeft: '5px',
-                                                visibility: hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ? 'visible' : 'hidden', // Show on hover
+                                                visibility: hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ? 'visible' : 'hidden',
                                             }}
-                                            onClick={() => setEditingCell({ rowIndex, colName: col.name })} // Enter editing mode
+                                            onClick={() => setEditingCell({ rowIndex, colName: col.name })}
                                         />
                                     )}
                                 </>
@@ -108,13 +101,14 @@ export const DataTableComponent = ({ filteredData, rows, globalFilter, selectedC
     };
 
     return (
-        <div style={{ overflowX: 'auto' }}> {/* Enable horizontal scrolling */}
-
-            {/* Pass selectedRows and setSelectedRows to ActionButtons component */}
+        <div style={{ overflowX: 'auto' }}>
             <ActionButtons
                 selectedRows={selectedRows}
                 setSelectedRows={setSelectedRows}
+                filteredData={filteredData}
+                setFilteredData={setFilteredData}
             />
+            <ToastContainer /> {/* Add this line */}
 
             <DataTable
                 value={filteredData}
@@ -125,34 +119,31 @@ export const DataTableComponent = ({ filteredData, rows, globalFilter, selectedC
                 responsiveLayout="scroll"
                 globalFilter={globalFilter}
                 removableSort
-                selection={selectedRows} // Pass selected rows to the DataTable
-                onSelectionChange={(e) => setSelectedRows(e.value)} // Update selected rows on change
+                selection={selectedRows}
+                onSelectionChange={(e) => setSelectedRows(e.value)}
+                rowKey="id"  // Use 'id' as the primary key for rows
             >
-                {/* Add Select All checkbox beside the header of the first column */}
                 <Column
                     header={
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {/* Place the "Select All" checkbox beside the header */}
                             <Checkbox
                                 checked={selectedRows.length === filteredData.length}
-                                onChange={handleSelectAll} // Handle "Select All"
+                                onChange={handleSelectAll}
                             />
                             <span style={{ marginLeft: '5px' }}>Select All</span>
                         </div>
                     }
                     body={(rowData) => (
                         <Checkbox
-                            checked={selectedRows.includes(rowData)}
-                            onChange={() => handleRowSelect(rowData)} // Select/deselect the row
+                            checked={selectedRows.includes(rowData.id)}  // Check based on 'id'
+                            onChange={() => handleRowSelect(rowData)}  // Pass the whole row for selection
                         />
                     )}
-                    style={{ width: '3rem', textAlign: 'center' }} // Adjust width
+                    style={{ width: '3rem', textAlign: 'center' }}
                 />
 
-                {/* Render the other columns */}
                 {selectedColumns && selectedColumns.map(col => renderColumn(col))}
             </DataTable>
-
         </div>
     );
 };

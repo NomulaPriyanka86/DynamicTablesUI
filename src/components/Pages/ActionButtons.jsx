@@ -1,44 +1,61 @@
-import React, { useState } from 'react';
+import { Button } from 'primereact/button';
+import React from 'react';
+import { toast } from 'react-toastify'; // Import toast
+import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
 
-const ActionButtons = ({ selectedRows, setSelectedRows }) => {
-    const [approving, setApproving] = useState(false);
-    const [rejecting, setRejecting] = useState(false);
+const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFilteredData }) => {
+    const updateStatus = (status) => {
+        const updatedFilteredData = filteredData.map(dataRow => {
+            // If the row id is in the selectedRows array, update its status
+            if (selectedRows.includes(dataRow.id)) {
+                return { ...dataRow, status };
+            }
+            return dataRow;  // Otherwise, leave the row unchanged
+        });
 
-    // Handle the approval process
-    const handleApprove = () => {
-        setApproving(true); // Indicate approval is in progress
+        setFilteredData(updatedFilteredData);
+        setSelectedRows([]); // Deselect after updating
 
-        // Simulate a delay or actual approval logic (you can replace this with API calls)
-        setTimeout(() => {
-            console.log('Approved:', selectedRows);
-            setSelectedRows([]); // Clear the selected rows after approval
-            setApproving(false); // Reset the approval state
-        }, 1000); // Simulate some delay (e.g., network request)
+        // Show a toast message based on the status
+        if (status === 'approved') {
+            toast.success('Approved successfully!');
+        } else if (status === 'rejected') {
+            toast.error('Rejected successfully!');
+        }
     };
 
-    // Handle the rejection process
-    const handleReject = () => {
-        setRejecting(true); // Indicate rejection is in progress
 
-        // Simulate a delay or actual rejection logic (you can replace this with API calls)
-        setTimeout(() => {
-            console.log('Rejected:', selectedRows);
-            setSelectedRows([]); // Clear the selected rows after rejection
-            setRejecting(false); // Reset the rejection state
-        }, 1000); // Simulate some delay (e.g., network request)
-    };
+    // Check if all selected rows have the same status
+    const allApproved = selectedRows.every(row => row.status === 'approved');
+    const allRejected = selectedRows.every(row => row.status === 'rejected');
+
+    const handleApprove = () => updateStatus('approved');
+    const handleReject = () => updateStatus('rejected');
 
     return (
-        selectedRows.length > 0 && (
-            <div style={{ marginTop: '10px' }}>
-                <button onClick={handleApprove} disabled={approving} style={{ marginRight: '10px' }}>
-                    {approving ? 'Approving...' : 'Approve'}
-                </button>
-                <button onClick={handleReject} disabled={rejecting}>
-                    {rejecting ? 'Rejecting...' : 'Reject'}
-                </button>
-            </div>
-        )
+        <div style={{ marginBottom: '1rem' }}>
+            {selectedRows.length > 0 && (
+                <>
+                    {/* Approve button */}
+                    <Button
+                        label="Approve"
+                        icon="pi pi-check"
+                        className="p-button-success"
+                        onClick={handleApprove}
+                        disabled={allApproved}
+                    />
+                    {/* Reject button */}
+                    <Button
+                        label="Reject"
+                        icon="pi pi-times"
+                        className="p-button-danger mr-2"
+                        onClick={handleReject}
+                        disabled={allRejected}
+                        color="reject"
+                    />
+                </>
+            )}
+        </div>
     );
 };
 

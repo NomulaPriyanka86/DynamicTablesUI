@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getPageSchema } from '../services/apiService';
 import sampleData from '../data/page1MockData.json';
-import sampleuserspinData from '../data/sampleMockData.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
 import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
 import { ColumnToggle } from './Pages/ColumnToggle';
 import { DataTableComponent } from './Pages/DataTableComponent';
+import { Toast } from 'primereact/toast'; // Import Toast component
+import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
 
 // Utility function to format date into dd-mm-yy format
 const formatDate = (dateString) => {
@@ -28,13 +29,29 @@ const DynamicTablesUI = ({ pageName }) => {
     const [globalFilter, setGlobalFilter] = useState('');
     const [rows, setRows] = useState(10);
     const [filteredData, setFilteredData] = useState([]);
+    const toast = useRef(null); // Create a toast reference
 
     // Handle editing of cell data
-    const handleEdit = (newValue, colName, rowIndex) => {
-        const updatedData = [...data];
-        updatedData[rowIndex][colName] = newValue;
+    const handleEdit = (newValue, colName, rowId) => {
+        // Update data with the edited value
+        const updatedData = data.map(row => {
+            if (row.id === rowId) {
+                row[colName] = newValue; // Update only the matching row
+            }
+            return row;
+        });
+
+        // Update both data and filteredData
         setData(updatedData);
-        setFilteredData(updatedData); // Reapply filter after editing
+        setFilteredData(updatedData); // Directly reapply the updated data
+
+        // Display a success toast when data is updated
+        toast.current.show({
+            severity: 'success',
+            summary: 'Data Updated',
+            detail: `${colName} updated to ${newValue}`,
+            life: 3000,
+        });
     };
 
     useEffect(() => {
@@ -47,6 +64,8 @@ const DynamicTablesUI = ({ pageName }) => {
 
                 const parsedData = sampleData.map(row => {
                     const parsedRow = {};
+                    // Add a primary key (unique id) to each row
+                    parsedRow.id = uuidv4(); // Unique ID for each row
                     schemaData.columns.forEach(col => {
                         if (row.hasOwnProperty(col.name)) {
                             // Check if the column type is 'Date' and format it
@@ -66,7 +85,7 @@ const DynamicTablesUI = ({ pageName }) => {
                 });
 
                 setData(parsedData);
-                setFilteredData(parsedData);
+                setFilteredData(parsedData); // Set initial filtered data
                 setLoading(false);
             } catch (error) {
                 setError(error);
@@ -86,11 +105,21 @@ const DynamicTablesUI = ({ pageName }) => {
         setFilteredData(filtered);
     };
 
+    useEffect(() => {
+        if (globalFilter) {
+            filterData(globalFilter);
+        } else {
+            setFilteredData(data);
+        }
+    }, [data, globalFilter]); // Re-run the effect when data or globalFilter changes
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
 
     return (
         <div>
+            <Toast ref={toast} /> {/* Add Toast component */}
+
             <h1>Page Schema for {pageName}</h1>
 
             <div className="p-d-flex p-ai-center">
@@ -123,11 +152,13 @@ const DynamicTablesUI = ({ pageName }) => {
 
             <DataTableComponent
                 filteredData={filteredData}
+                setFilteredData={setFilteredData}
                 rows={rows}
                 globalFilter={globalFilter}
                 selectedColumns={selectedColumns}
                 formatDate={formatDate} // Pass the formatDate function to DataTableComponent
                 handleEdit={handleEdit} // Pass the handleEdit function to allow editing
+                toast={toast} // Pass toast reference to DataTableComponent for notifications
             />
         </div>
     );
