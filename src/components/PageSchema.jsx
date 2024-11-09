@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getPageSchema } from '../../services/apiService';
-import sampleData from '../../data/page1MockData.json';
+import { getPageSchema } from '../services/apiService';
+import sampleData from '../data/page1MockData.json';
 import 'primereact/resources/themes/saga-blue/theme.css';  // Choose a theme
 import 'primereact/resources/primereact.min.css';
 
