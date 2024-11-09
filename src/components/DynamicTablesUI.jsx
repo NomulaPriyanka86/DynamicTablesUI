@@ -7,6 +7,17 @@ import { ClearFiltersButton } from './Pages/ClearFiltersButton';
 import { ColumnToggle } from './Pages/ColumnToggle';
 import { DataTableComponent } from './Pages/DataTableComponent';
 
+// Utility function to format date into dd-mm-yy format
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // Return original string if parsing fails
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear());
+    return `${day}-${month}-${year}`;
+};
+
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,6 +28,14 @@ const DynamicTablesUI = ({ pageName }) => {
     const [rows, setRows] = useState(10);
     const [filteredData, setFilteredData] = useState([]);
 
+    // Handle editing of cell data
+    const handleEdit = (newValue, colName, rowIndex) => {
+        const updatedData = [...data];
+        updatedData[rowIndex][colName] = newValue;
+        setData(updatedData);
+        setFilteredData(updatedData); // Reapply filter after editing
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -24,17 +43,24 @@ const DynamicTablesUI = ({ pageName }) => {
                 const schemaData = response.data;
                 setSchema(schemaData);
                 setSelectedColumns(schemaData.columns);
-                const filteredData = sampleData.map(row => {
-                    const filteredRow = {};
+
+                const parsedData = sampleData.map(row => {
+                    const parsedRow = {};
                     schemaData.columns.forEach(col => {
                         if (row.hasOwnProperty(col.name)) {
-                            filteredRow[col.name] = row[col.name];
+                            // Check if the column type is 'Date' and parse it
+                            if (col.type === 'Date' && row[col.name]) {
+                                parsedRow[col.name] = new Date(row[col.name]);
+                            } else {
+                                parsedRow[col.name] = row[col.name];
+                            }
                         }
                     });
-                    return filteredRow;
+                    return parsedRow;
                 });
-                setData(filteredData);
-                setFilteredData(filteredData);
+
+                setData(parsedData);
+                setFilteredData(parsedData);
                 setLoading(false);
             } catch (error) {
                 setError(error);
@@ -94,6 +120,8 @@ const DynamicTablesUI = ({ pageName }) => {
                 rows={rows}
                 globalFilter={globalFilter}
                 selectedColumns={selectedColumns}
+                formatDate={formatDate} // Pass the formatDate function to DataTableComponent
+                handleEdit={handleEdit} // Pass the handleEdit function to allow editing
             />
         </div>
     );
