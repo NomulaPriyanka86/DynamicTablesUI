@@ -31,27 +31,33 @@ const DynamicTablesUI = ({ pageName }) => {
     const [filteredData, setFilteredData] = useState([]);
     const toast = useRef(null); // Create a toast reference
 
-    // Handle editing of cell data
     const handleEdit = (newValue, colName, rowId) => {
-        // Update data with the edited value
-        const updatedData = data.map(row => {
-            if (row.id === rowId) {
-                row[colName] = newValue; // Update only the matching row
-            }
-            return row;
-        });
+        // Find the row to check if the value is actually different
+        const row = data.find(row => row.id === rowId);
+        const oldValue = row[colName];
 
-        // Update both data and filteredData
-        setData(updatedData);
-        setFilteredData(updatedData); // Directly reapply the updated data
+        // Only update if the new value is different from the old value
+        if (newValue !== oldValue) {
+            // Update data with the edited value
+            const updatedData = data.map(row => {
+                if (row.id === rowId) {
+                    row[colName] = newValue; // Update only the matching row
+                }
+                return row;
+            });
 
-        // Display a success toast when data is updated
-        toast.current.show({
-            severity: 'success',
-            summary: 'Data Updated',
-            detail: `${colName} updated to ${newValue}`,
-            life: 3000,
-        });
+            // Update both data and filteredData
+            setData(updatedData);
+            setFilteredData(updatedData); // Directly reapply the updated data
+
+            // Display a success toast when data is updated
+            toast.current.show({
+                severity: 'success',
+                summary: 'Data Updated',
+                detail: `${colName} updated to ${newValue}`,
+                life: 3000,
+            });
+        }
     };
 
     useEffect(() => {

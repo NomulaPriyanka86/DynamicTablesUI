@@ -4,14 +4,16 @@ import { Column } from 'primereact/column';
 import { FaPencilAlt } from 'react-icons/fa';
 import { Checkbox } from 'primereact/checkbox';
 import ActionButtons from './ActionButtons';
+import { Calendar } from 'primereact/calendar';  // Import Calendar component
 import { ToastContainer } from 'react-toastify';
 
 export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
+    const [columnFilters, setColumnFilters] = useState({});  // Manage filters for each column
 
-    // Use 'id' as the unique key for each row
+    // Handle row selection
     const handleRowSelect = (rowData) => {
         const newSelectedRows = selectedRows.includes(rowData.id)
             ? selectedRows.filter(id => id !== rowData.id)  // Deselect if already selected
@@ -19,6 +21,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
         setSelectedRows(newSelectedRows);
     };
 
+    // Handle "Select All" functionality
     const handleSelectAll = () => {
         if (selectedRows.length === filteredData.length) {
             setSelectedRows([]);  // Deselect all if all rows are selected
@@ -27,6 +30,22 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
         }
     };
 
+    // Handle filter change for date columns
+    const handleDateFilterChange = (value, columnName) => {
+        setColumnFilters(prevFilters => ({
+            ...prevFilters,
+            [columnName]: value,
+        }));
+
+        // Filter data by date range (if needed, adjust logic based on your requirements)
+        const filtered = filteredData.filter(row => {
+            const rowValue = row[columnName];
+            return rowValue && rowValue.toString().includes(value.toString());
+        });
+        setFilteredData(filtered);
+    };
+
+    // Render each column dynamically
     const renderColumn = (col) => {
         const matchMode = col.type === 'Date' ? 'dateIs' : 'contains';
         const columnWidth = '20%';
@@ -96,6 +115,30 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         </div>
                     );
                 }}
+                filterElement={(options) => {
+                    if (col.type === 'Date') {
+                        return (
+                            <div className="p-inputgroup">
+                                <Calendar
+                                    value={columnFilters[col.name]}
+                                    onChange={(e) => handleDateFilterChange(e.value, col.name)}
+                                    showIcon
+                                    dateFormat="dd-mm-yy"
+                                    showButtonBar
+                                />
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <input
+                                type="text"
+                                value={options.value}
+                                onChange={(e) => options.filterCallback(e.target.value)}
+                                placeholder={`Search ${col.name}`}
+                            />
+                        );
+                    }
+                }}
             />
         );
     };
@@ -121,7 +164,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 removableSort
                 selection={selectedRows}
                 onSelectionChange={(e) => setSelectedRows(e.value)}
-                rowKey="id"  // Use 'id' as the primary key for rows
+            // rowKey="id"  // Use 'id' as the primary key for rows
             >
                 <Column
                     header={
