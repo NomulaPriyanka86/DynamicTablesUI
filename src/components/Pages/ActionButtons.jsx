@@ -1,33 +1,39 @@
 import { Button } from 'primereact/button';
 import React from 'react';
-import { toast } from 'react-toastify'; // Import toast
-import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFilteredData }) => {
     const updateStatus = (status) => {
+        let statusChanged = false;
         const updatedFilteredData = filteredData.map(dataRow => {
-            // If the row id is in the selectedRows array, update its status
             if (selectedRows.includes(dataRow.id)) {
-                return { ...dataRow, status };
+                if (dataRow.status === 'rejected' && status === 'approved') {
+                    toast.warning('Rejected items cannot be approved.');
+                    return dataRow;
+                }
+                if (dataRow.status !== status) {
+                    statusChanged = true;
+                    return { ...dataRow, status };
+                }
             }
-            return dataRow;  // Otherwise, leave the row unchanged
+            return dataRow;
         });
 
         setFilteredData(updatedFilteredData);
-        setSelectedRows([]); // Deselect after updating
+        setSelectedRows([]);
 
-        // Show a toast message based on the status
-        if (status === 'approved') {
-            toast.success('Approved successfully!');
-        } else if (status === 'rejected') {
-            toast.error('Rejected successfully!');
+        if (statusChanged) {
+            if (status === 'approved') {
+                toast.success('Approved successfully!');
+            } else if (status === 'rejected') {
+                toast.error('Rejected successfully!');
+            }
         }
     };
 
-
-    // Check if all selected rows have the same status
+    const anyRejected = selectedRows.some(row => row.status === 'rejected');
     const allApproved = selectedRows.every(row => row.status === 'approved');
-    const allRejected = selectedRows.every(row => row.status === 'rejected');
 
     const handleApprove = () => updateStatus('approved');
     const handleReject = () => updateStatus('rejected');
@@ -36,22 +42,18 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
         <div style={{ marginBottom: '1rem' }}>
             {selectedRows.length > 0 && (
                 <>
-                    {/* Approve button */}
                     <Button
                         label="Approve"
                         icon="pi pi-check"
                         className="p-button-success"
                         onClick={handleApprove}
-                        disabled={allApproved}
+                        disabled={anyRejected || allApproved}
                     />
-                    {/* Reject button */}
                     <Button
                         label="Reject"
                         icon="pi pi-times"
                         className="p-button-danger mr-2"
                         onClick={handleReject}
-                        disabled={allRejected}
-                        color="reject"
                     />
                 </>
             )}
