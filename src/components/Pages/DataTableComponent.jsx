@@ -4,26 +4,27 @@ import { Column } from 'primereact/column';
 import { FaPencilAlt } from 'react-icons/fa';
 import { Checkbox } from 'primereact/checkbox';
 import ActionButtons from './ActionButtons';
-import { ToastContainer } from 'react-toastify';
 
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit }) => {
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit, toast }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
 
-    // Use 'id' as the unique key for each row
     const handleRowSelect = (rowData) => {
-        const newSelectedRows = selectedRows.includes(rowData.id)
-            ? selectedRows.filter(id => id !== rowData.id)  // Deselect if already selected
-            : [...selectedRows, rowData.id];  // Select if not already selected
+        let newSelectedRows = [...selectedRows];
+        if (newSelectedRows.includes(rowData)) {
+            newSelectedRows = newSelectedRows.filter(row => row !== rowData);
+        } else {
+            newSelectedRows.push(rowData);
+        }
         setSelectedRows(newSelectedRows);
     };
 
     const handleSelectAll = () => {
         if (selectedRows.length === filteredData.length) {
-            setSelectedRows([]);  // Deselect all if all rows are selected
+            setSelectedRows([]);
         } else {
-            setSelectedRows(filteredData.map(row => row.id));  // Select all rows by their unique 'id'
+            setSelectedRows(filteredData);
         }
     };
 
@@ -68,12 +69,12 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                     defaultValue={value}
                                     autoFocus
                                     onBlur={(e) => {
-                                        handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                        handleEdit(e.target.value, col.name, rowIndex);
                                         setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                            handleEdit(e.target.value, col.name, rowIndex);
                                             setEditingCell(null);
                                         }
                                     }}
@@ -107,8 +108,8 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 setSelectedRows={setSelectedRows}
                 filteredData={filteredData}
                 setFilteredData={setFilteredData}
+                toast={toast}
             />
-            <ToastContainer /> {/* Add this line */}
 
             <DataTable
                 value={filteredData}
@@ -121,7 +122,6 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 removableSort
                 selection={selectedRows}
                 onSelectionChange={(e) => setSelectedRows(e.value)}
-                rowKey="id"  // Use 'id' as the primary key for rows
             >
                 <Column
                     header={
@@ -135,8 +135,8 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                     }
                     body={(rowData) => (
                         <Checkbox
-                            checked={selectedRows.includes(rowData.id)}  // Check based on 'id'
-                            onChange={() => handleRowSelect(rowData)}  // Pass the whole row for selection
+                            checked={selectedRows.includes(rowData)}
+                            onChange={() => handleRowSelect(rowData)}
                         />
                     )}
                     style={{ width: '3rem', textAlign: 'center' }}
