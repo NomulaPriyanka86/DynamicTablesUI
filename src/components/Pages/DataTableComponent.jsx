@@ -22,6 +22,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
     const [hoveredCell, setHoveredCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [columnFilters, setColumnFilters] = useState({});
+    const [initialValue, setInitialValue] = useState(null);
 
     // Handle row selection
     const handleRowSelect = (rowData) => {
@@ -99,23 +100,28 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                             onMouseLeave={handleMouseLeave}
                         >
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
-
                                 <input
                                     type="text"
-                                    defaultValue={value}
+                                    defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
                                     autoFocus
+                                    onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value)} // Track the initial value
                                     onBlur={(e) => {
-                                        handleEdit(e.target.value, col.name, rowData.id);
+                                        const newValue = e.target.value;
+                                        if (newValue !== initialValue) {
+                                            handleEdit(newValue, col.name, rowData.id);
+                                        }
                                         setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleEdit(e.target.value, col.name, rowData.id);
+                                            const newValue = e.target.value;
+                                            if (newValue !== initialValue) {
+                                                handleEdit(newValue, col.name, rowData.id);
+                                            }
                                             setEditingCell(null);
                                         }
                                     }}
                                 />
-
                             ) : (
                                 <>
                                     {col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
@@ -134,6 +140,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         </div>
                     );
                 }}
+
                 filterElement={(options) => {
                     if (col.type === 'Date') {
                         return (

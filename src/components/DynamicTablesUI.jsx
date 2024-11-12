@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPageSchema } from '../services/apiService';
-import sampleData from '../data/page1MockData.json';
+import sampleData from '../data/sampleMockData2.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
 import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
@@ -8,17 +8,6 @@ import { ColumnToggle } from './Pages/ColumnToggle';
 import { DataTableComponent } from './Pages/DataTableComponent';
 import { Toast } from 'primereact/toast'; // Import Toast component
 import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
-
-// Utility function to format date into dd-mm-yy format
-const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date)) return dateString; // Return original string if parsing fails
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear());
-    return `${day}-${month}-${year}`;
-};
 
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
@@ -162,7 +151,7 @@ const DynamicTablesUI = ({ pageName }) => {
                 rows={rows}
                 globalFilter={globalFilter}
                 selectedColumns={selectedColumns}
-                formatDate={formatDate} // Pass the formatDate function to DataTableComponent
+                //   formatDate={formatDate} // Pass the formatDate function to DataTableComponent
                 handleEdit={handleEdit} // Pass the handleEdit function to allow editing
                 toast={toast} // Pass toast reference to DataTableComponent for notifications
             />
