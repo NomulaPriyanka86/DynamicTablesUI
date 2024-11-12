@@ -4,48 +4,65 @@ import { Column } from 'primereact/column';
 import { FaPencilAlt } from 'react-icons/fa';
 import { Checkbox } from 'primereact/checkbox';
 import ActionButtons from './ActionButtons';
-import { Calendar } from 'primereact/calendar';  // Import Calendar component
+import { Calendar } from 'primereact/calendar';
 import { ToastContainer } from 'react-toastify';
 
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, formatDate, handleEdit }) => {
+// Utility function to format date to dd-mm-yyyy
+const formatDateToDDMMYYYY = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
-    const [columnFilters, setColumnFilters] = useState({});  // Manage filters for each column
+    const [columnFilters, setColumnFilters] = useState({});
 
     // Handle row selection
     const handleRowSelect = (rowData) => {
         const newSelectedRows = selectedRows.includes(rowData.id)
-            ? selectedRows.filter(id => id !== rowData.id)  // Deselect if already selected
-            : [...selectedRows, rowData.id];  // Select if not already selected
+            ? selectedRows.filter(id => id !== rowData.id)
+            : [...selectedRows, rowData.id];
         setSelectedRows(newSelectedRows);
     };
 
     // Handle "Select All" functionality
     const handleSelectAll = () => {
         if (selectedRows.length === filteredData.length) {
-            setSelectedRows([]);  // Deselect all if all rows are selected
+            setSelectedRows([]);
         } else {
-            setSelectedRows(filteredData.map(row => row.id));  // Select all rows by their unique 'id'
+            setSelectedRows(filteredData.map(row => row.id));
         }
     };
 
     // Handle filter change for date columns
     const handleDateFilterChange = (value, columnName) => {
+        const formattedFilterDate = formatDateToDDMMYYYY(value);
+
         setColumnFilters(prevFilters => ({
             ...prevFilters,
-            [columnName]: value,
+            [columnName]: formattedFilterDate,
         }));
 
-        // Filter data by date range (if needed, adjust logic based on your requirements)
         const filtered = filteredData.filter(row => {
-            const rowValue = row[columnName];
-            return rowValue && rowValue.toString().includes(value.toString());
+            const rowValueFormatted = formatDateToDDMMYYYY(row[columnName]);
+            return rowValueFormatted === formattedFilterDate;
         });
+
         setFilteredData(filtered);
+        // Reset the filter input after applying the filter
+        setColumnFilters((prevFilters) => {
+            const updatedFilters = { ...prevFilters };
+            delete updatedFilters[columnName]; // Clear the current column filter after applying
+            return updatedFilters;
+        });
     };
 
-    // Render each column dynamically
     const renderColumn = (col) => {
         const matchMode = col.type === 'Date' ? 'dateIs' : 'contains';
         const columnWidth = '20%';
@@ -82,24 +99,26 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                             onMouseLeave={handleMouseLeave}
                         >
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
+
                                 <input
                                     type="text"
                                     defaultValue={value}
                                     autoFocus
                                     onBlur={(e) => {
-                                        handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                        handleEdit(e.target.value, col.name, rowData.id);
                                         setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleEdit(e.target.value, col.name, rowData.id);  // Pass 'rowData.id' to identify the row
+                                            handleEdit(e.target.value, col.name, rowData.id);
                                             setEditingCell(null);
                                         }
                                     }}
                                 />
+
                             ) : (
                                 <>
-                                    {col.type === 'Date' ? formatDate(value) : value}
+                                    {col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
                                     {isEditable && (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name || editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
                                         <FaPencilAlt
                                             style={{
@@ -120,7 +139,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         return (
                             <div className="p-inputgroup">
                                 <Calendar
-                                    value={columnFilters[col.name]}
+                                    value={columnFilters[col.name] ? new Date(columnFilters[col.name].split('-').reverse().join('-')) : null}
                                     onChange={(e) => handleDateFilterChange(e.value, col.name)}
                                     showIcon
                                     dateFormat="dd-mm-yy"
@@ -151,7 +170,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 filteredData={filteredData}
                 setFilteredData={setFilteredData}
             />
-            <ToastContainer /> {/* Add this line */}
+            <ToastContainer />
 
             <DataTable
                 value={filteredData}
@@ -164,7 +183,6 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 removableSort
                 selection={selectedRows}
                 onSelectionChange={(e) => setSelectedRows(e.value)}
-            // rowKey="id"  // Use 'id' as the primary key for rows
             >
                 <Column
                     header={
@@ -178,8 +196,8 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                     }
                     body={(rowData) => (
                         <Checkbox
-                            checked={selectedRows.includes(rowData.id)}  // Check based on 'id'
-                            onChange={() => handleRowSelect(rowData)}  // Pass the whole row for selection
+                            checked={selectedRows.includes(rowData.id)}
+                            onChange={() => handleRowSelect(rowData)}
                         />
                     )}
                     style={{ width: '3rem', textAlign: 'center' }}

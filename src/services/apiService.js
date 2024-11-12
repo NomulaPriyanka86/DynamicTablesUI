@@ -17,3 +17,12 @@ export const getAllPageNames = () => {
 export const getAllTenants = () => {
   return api.get('/tenants');
 };
+
+// Function to get KYC data
+export const getKycData = () => {
+  return api.get('/kyc-data');
+};
+
+export const getUserSpins =() => {
+  return api.get('/spin-data');
+}
