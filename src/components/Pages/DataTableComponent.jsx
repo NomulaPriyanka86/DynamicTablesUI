@@ -102,13 +102,23 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
                                 <input
                                     type="text"
-                                    defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
+                                    defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || ''}
                                     autoFocus
-                                    onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value)} // Track the initial value
+                                    onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
                                     onBlur={(e) => {
                                         const newValue = e.target.value;
                                         if (newValue !== initialValue) {
-                                            handleEdit(newValue, col.name, rowData.id);
+                                            if (col.type === 'Date') {
+                                                // Parse the date value to ensure correct formatting
+                                                const parsedDate = new Date(newValue.split('-').reverse().join('-'));
+                                                if (!isNaN(parsedDate)) {
+                                                    handleEdit(parsedDate.toISOString(), col.name, rowData.id); // Send a valid ISO string
+                                                } else {
+                                                    console.error('Invalid date format');
+                                                }
+                                            } else {
+                                                handleEdit(newValue, col.name, rowData.id);
+                                            }
                                         }
                                         setEditingCell(null);
                                     }}
