@@ -66,7 +66,6 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
 
     const renderColumn = (col) => {
         const matchMode = col.type === 'Date' ? 'dateIs' : 'contains';
-        const columnWidth = '20%';
 
         return (
             <Column
@@ -78,7 +77,6 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 filter={true}
                 filterMatchMode={matchMode}
                 filterPlaceholder={`Search ${col.name}`}
-                style={{ textAlign: 'center', width: columnWidth }}
                 body={(rowData, { rowIndex }) => {
                     const value = rowData[col.name];
                     const isEditable = col.editable;
