@@ -8,6 +8,8 @@ import { ColumnToggle } from './Pages/ColumnToggle';
 import { DataTableComponent } from './Pages/DataTableComponent';
 import { Toast } from 'primereact/toast'; // Import Toast component
 import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
+import { validateField } from './Pages/Validations';
+import { getKycData, getUserSpins } from '../services/dataService';
 
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
@@ -25,9 +27,30 @@ const DynamicTablesUI = ({ pageName }) => {
         const row = data.find(row => row.id === rowId);
         const oldValue = row[colName];
 
-        // Only update if the new value is different from the old value
+        // Ensure newValue is a valid string or number before proceeding with validation
+        if (newValue == null || newValue === '') {
+            toast.current.show({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: `${colName} cannot be empty`,
+                life: 3000,
+            });
+            return;
+        }
+
         if (newValue !== oldValue) {
-            // Update data with the edited value
+            const validationResult = validateField(newValue, colName, schema);
+
+            if (validationResult !== true) {
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: validationResult,
+                    life: 3000,
+                });
+                return; // Exit early if validation fails
+            }
+
             const updatedData = data.map(row => {
                 if (row.id === rowId) {
                     row[colName] = newValue; // Update only the matching row
@@ -52,37 +75,52 @@ const DynamicTablesUI = ({ pageName }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getPageSchema(pageName);
-                const schemaData = response.data;
+                const schemaResponse = await getPageSchema(pageName);
+                const schemaData = schemaResponse.data;
                 setSchema(schemaData);
                 setSelectedColumns(schemaData.columns);
 
-                const parsedData = sampleData.map(row => {
-                    const parsedRow = {};
-                    // Add a primary key (unique id) to each row
-                    parsedRow.id = uuidv4(); // Unique ID for each row
-                    schemaData.columns.forEach(col => {
-                        if (row.hasOwnProperty(col.name)) {
-                            // Check if the column type is 'Date' and format it
-                            if (col.type === 'Date' && row[col.name]) {
-                                parsedRow[col.name] = new Date(row[col.name]);
-                            } else {
-                                // If the column is 'status', dynamically set the value
-                                if (col.name === 'status') {
-                                    parsedRow[col.name] = row[col.name] === 'approve' ? 'Approved' : row[col.name] === 'reject' ? 'Rejected' : row[col.name];
-                                } else {
-                                    parsedRow[col.name] = row[col.name];
-                                }
-                            }
-                        }
-                    });
-                    return parsedRow;
-                });
+                const kycResponse = await getUserSpins();
+                const kycData = kycResponse.data;
 
-                setData(parsedData);
-                setFilteredData(parsedData); // Set initial filtered data
+                console.log('KYC Data Array:', kycData.data);
+
+                if (Array.isArray(kycData.data)) {
+                    const parsedData = kycData.data.map(row => {
+                        const parsedRow = {};
+                        parsedRow.id = uuidv4(); // Unique ID for each row
+
+                        let isValidRow = true; // Flag to track if row has valid data
+
+                        schemaData.columns.forEach(col => {
+                            if (row.hasOwnProperty(col.name)) {
+                                if (col.type === 'Date' && row[col.name]) {
+                                    parsedRow[col.name] = new Date(row[col.name]);
+                                } else {
+                                    if (col.name === 'status') {
+                                        parsedRow[col.name] = row[col.name] === 'approve' ? 'Approved' : row[col.name] === 'reject' ? 'Rejected' : row[col.name];
+                                    } else {
+                                        parsedRow[col.name] = row[col.name];
+                                    }
+                                }
+                            } else {
+                                isValidRow = false; // Mark row as invalid if a schema key is missing
+                            }
+                        });
+
+                        return isValidRow ? parsedRow : null; // Only return row if it's valid
+                    }).filter(row => row !== null); // Remove any invalid rows
+
+                    setData(parsedData);
+                    setFilteredData(parsedData); // Set initial filtered data
+                } else {
+                    console.error('KYC Data is not in the expected array format:', kycData.data);
+                    setError(new Error('KYC Data is not in the expected format'));
+                }
+
                 setLoading(false);
             } catch (error) {
+                console.error('Error fetching or parsing data:', error);
                 setError(error);
                 setLoading(false);
             }
@@ -145,16 +183,47 @@ const DynamicTablesUI = ({ pageName }) => {
                 setSelectedColumns={setSelectedColumns}
             />
 
-            <DataTableComponent
-                filteredData={filteredData}
-                setFilteredData={setFilteredData}
-                rows={rows}
-                globalFilter={globalFilter}
-                selectedColumns={selectedColumns}
-                //   formatDate={formatDate} // Pass the formatDate function to DataTableComponent
-                handleEdit={handleEdit} // Pass the handleEdit function to allow editing
-                toast={toast} // Pass toast reference to DataTableComponent for notifications
-            />
+            {/* Conditional rendering of the table headers or a no data message */}
+            {filteredData.length === 0 ? (
+                <table className="p-d-table">
+                    <thead>
+                        <tr>
+                            {selectedColumns.map((col, index) => (
+                                <th key={index} className="table-header">{col.name}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredData.length === 0 || filteredData.every(row => Object.values(row).every(value => !value)) ? (
+                            // If no data or all data is mismatched (empty or falsy), display only the headers
+                            <tr>
+                                <td colSpan={selectedColumns.length} className="no-data">No data available</td>
+                            </tr>
+                        ) : (
+                            // If data is available and not mismatched, display the table rows
+                            filteredData.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                    {selectedColumns.map((col, colIndex) => (
+                                        <td key={colIndex}>{row[col.name]}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+
+
+            ) : (
+                <DataTableComponent
+                    filteredData={filteredData}
+                    setFilteredData={setFilteredData}
+                    rows={rows}
+                    globalFilter={globalFilter}
+                    selectedColumns={selectedColumns}
+                    handleEdit={handleEdit}
+                    toast={toast}
+                />
+            )}
         </div>
     );
 };

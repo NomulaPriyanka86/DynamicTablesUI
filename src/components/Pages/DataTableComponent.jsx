@@ -7,7 +7,7 @@ import ActionButtons from './ActionButtons';
 import { Calendar } from 'primereact/calendar';
 import { ToastContainer } from 'react-toastify';
 
-// Utility function to format date to dd-mm-yyyy
+// Utility function to format date to DD-MM-YYYY
 const formatDateToDDMMYYYY = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -105,26 +105,74 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                     onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
                                     onBlur={(e) => {
                                         const newValue = e.target.value;
+
+                                        // Only process if the new value is different from the initial value
                                         if (newValue !== initialValue) {
                                             if (col.type === 'Date') {
-                                                // Parse the date value to ensure correct formatting
-                                                const parsedDate = new Date(newValue.split('-').reverse().join('-'));
-                                                if (!isNaN(parsedDate)) {
-                                                    handleEdit(parsedDate.toISOString(), col.name, rowData.id); // Send a valid ISO string
+                                                // Validate and parse the input date in DD-MM-YYYY format
+                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+                                                const match = newValue.match(dateRegex);
+
+                                                if (match) {
+                                                    const [_, day, month, year] = match;
+                                                    const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD format
+
+                                                    const parsedDate = new Date(formattedDate);
+
+                                                    // If it's a valid date, save it in YYYY-MM-DD format
+                                                    if (!isNaN(parsedDate)) {
+                                                        // Call handleEdit with the date in the correct format (YYYY-MM-DD)
+                                                        handleEdit(parsedDate.toISOString().split('T')[0], col.name, rowData.id); // Send date in YYYY-MM-DD format
+
+                                                        // Show toast with the formatted date in DD-MM-YYYY
+                                                        const formattedToastDate = formatDateToDDMMYYYY(parsedDate);
+                                                        toast.success(`Date updated to: ${formattedToastDate}`);
+                                                    } else {
+                                                        console.error('Invalid date format');
+                                                    }
                                                 } else {
                                                     console.error('Invalid date format');
                                                 }
                                             } else {
+                                                // Handle non-date fields
                                                 handleEdit(newValue, col.name, rowData.id);
                                             }
                                         }
+
                                         setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             const newValue = e.target.value;
+
                                             if (newValue !== initialValue) {
-                                                handleEdit(newValue, col.name, rowData.id);
+                                                if (col.type === 'Date') {
+                                                    // Validate and parse the input date in DD-MM-YYYY format
+                                                    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+                                                    const match = newValue.match(dateRegex);
+
+                                                    if (match) {
+                                                        const [_, day, month, year] = match;
+                                                        const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD format
+
+                                                        const parsedDate = new Date(formattedDate);
+
+                                                        if (!isNaN(parsedDate)) {
+                                                            // Save the date in YYYY-MM-DD format
+                                                            handleEdit(parsedDate.toISOString().split('T')[0], col.name, rowData.id);
+
+                                                            // Show toast with the formatted date
+                                                            const formattedToastDate = formatDateToDDMMYYYY(parsedDate);
+                                                            toast.success(`Date updated to: ${formattedToastDate}`);
+                                                        } else {
+                                                            console.error('Invalid date format');
+                                                        }
+                                                    } else {
+                                                        console.error('Invalid date format');
+                                                    }
+                                                } else {
+                                                    handleEdit(newValue, col.name, rowData.id);
+                                                }
                                             }
                                             setEditingCell(null);
                                         }
@@ -188,37 +236,20 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
             <ToastContainer />
 
             <DataTable
-                value={filteredData}
+                value={filteredData.length > 0 ? filteredData : []}  // Conditional rendering for rows
                 paginator={true}
                 rows={rows}
                 showGridlines
-                stripedRows
-                responsiveLayout="scroll"
+                emptyMessage="No data available"
                 globalFilter={globalFilter}
-                removableSort
                 selection={selectedRows}
                 onSelectionChange={(e) => setSelectedRows(e.value)}
+                dataKey="id"
+                selectionMode="checkbox"
+                onHeaderCheckboxToggle={handleSelectAll}
+                removableSort
             >
-                <Column
-                    header={
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Checkbox
-                                checked={selectedRows.length === filteredData.length}
-                                onChange={handleSelectAll}
-                            />
-                            <span style={{ marginLeft: '5px' }}>Select All</span>
-                        </div>
-                    }
-                    body={(rowData) => (
-                        <Checkbox
-                            checked={selectedRows.includes(rowData.id)}
-                            onChange={() => handleRowSelect(rowData)}
-                        />
-                    )}
-                    style={{ width: '3rem', textAlign: 'center' }}
-                />
-
-                {selectedColumns && selectedColumns.map(col => renderColumn(col))}
+                {selectedColumns.map((col) => renderColumn(col))}
             </DataTable>
         </div>
     );
