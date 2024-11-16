@@ -249,7 +249,25 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 onHeaderCheckboxToggle={handleSelectAll}
                 removableSort
             >
-                {selectedColumns.map((col) => renderColumn(col))}
+                <Column
+                    header={
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Checkbox
+                                checked={selectedRows.length === filteredData.length}
+                                onChange={handleSelectAll}
+                            />
+                            <span style={{ marginLeft: '5px' }}>Select All</span>
+                        </div>
+                    }
+                    body={(rowData) => (
+                        <Checkbox
+                            checked={selectedRows.includes(rowData.id)}
+                            onChange={() => handleRowSelect(rowData)}
+                        />
+                    )}
+                    style={{ width: '3rem', textAlign: 'center' }}
+                />
+                {selectedColumns && selectedColumns.map(col => renderColumn(col))}
             </DataTable>
         </div>
     );
