@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPageSchema } from '../services/apiService';
-import sampleData from '../data/sampleMockData2.json';
+import sampleData from '../data/sampleMockData.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
 import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
@@ -26,18 +26,6 @@ const DynamicTablesUI = ({ pageName }) => {
         // Find the row to check if the value is actually different
         const row = data.find(row => row.id === rowId);
         const oldValue = row[colName];
-
-        // Ensure newValue is a valid string or number before proceeding with validation
-        if (newValue == null || newValue === '') {
-            toast.current.show({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: `${colName} cannot be empty`,
-                life: 3000,
-            });
-            return;
-        }
-
         if (newValue !== oldValue) {
             const validationResult = validateField(newValue, colName, schema);
 
@@ -65,7 +53,7 @@ const DynamicTablesUI = ({ pageName }) => {
             // Display a success toast when data is updated
             toast.current.show({
                 severity: 'success',
-                summary: 'Data Updated',
+                summary: 'Data Updated...',
                 detail: `${colName} updated to ${newValue}`,
                 life: 3000,
             });
@@ -80,13 +68,15 @@ const DynamicTablesUI = ({ pageName }) => {
                 setSchema(schemaData);
                 setSelectedColumns(schemaData.columns);
 
-                const kycResponse = await getUserSpins();
-                const kycData = kycResponse.data;
+                // const kycResponse = await getUserSpins();
+                // const kycData = kycResponse.data;
+                // console.log('KYC Data Array:', kycData.data);
 
-                console.log('KYC Data Array:', kycData.data);
+                // Use sample data instead of the API call
+                const kycData = sampleData; // Assuming sampleData is an array of objects
 
-                if (Array.isArray(kycData.data)) {
-                    const parsedData = kycData.data.map(row => {
+                if (Array.isArray(kycData)) {
+                    const parsedData = kycData.map(row => {
                         const parsedRow = {};
                         parsedRow.id = uuidv4(); // Unique ID for each row
 
@@ -114,8 +104,8 @@ const DynamicTablesUI = ({ pageName }) => {
                     setData(parsedData);
                     setFilteredData(parsedData); // Set initial filtered data
                 } else {
-                    console.error('KYC Data is not in the expected array format:', kycData.data);
-                    setError(new Error('KYC Data is not in the expected format'));
+                    console.error('Sample Data is not in the expected array format:', kycData);
+                    setError(new Error('Sample Data is not in the expected format'));
                 }
 
                 setLoading(false);
