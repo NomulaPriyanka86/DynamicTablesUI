@@ -32,9 +32,6 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
         }
     };
 
-    const anyRejected = selectedRows.some(row => row.status === 'rejected');
-    const allApproved = selectedRows.every(row => row.status === 'approved');
-
     const handleApprove = () => updateStatus('approved');
     const handleReject = () => updateStatus('rejected');
 
@@ -47,7 +44,6 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
                         icon="pi pi-check"
                         className="p-button-success"
                         onClick={handleApprove}
-                        disabled={anyRejected || allApproved}
                     />
                     <Button
                         label="Reject"

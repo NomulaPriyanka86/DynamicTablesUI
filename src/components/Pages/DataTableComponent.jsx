@@ -242,11 +242,9 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 showGridlines
                 emptyMessage="No data available"
                 globalFilter={globalFilter}
-                selection={selectedRows}
-                onSelectionChange={(e) => setSelectedRows(e.value)}
+                selection={selectedRows}  // Controlled by `selectedRows`
+                onSelectionChange={(e) => setSelectedRows(e.value)}  // Updates the selected rows when checkboxes are clicked
                 dataKey="id"
-                selectionMode="checkbox"
-                onHeaderCheckboxToggle={handleSelectAll}
                 removableSort
             >
                 <Column
@@ -254,15 +252,15 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <Checkbox
                                 checked={selectedRows.length === filteredData.length}
-                                onChange={handleSelectAll}
+                                onChange={handleSelectAll}  // "Select All" functionality
                             />
                             <span style={{ marginLeft: '5px' }}>Select All</span>
                         </div>
                     }
                     body={(rowData) => (
                         <Checkbox
-                            checked={selectedRows.includes(rowData.id)}
-                            onChange={() => handleRowSelect(rowData)}
+                            checked={selectedRows.includes(rowData.id)}  // Checkbox state is controlled by `selectedRows`
+                            onChange={() => handleRowSelect(rowData)}  // Only update selection when checkbox is clicked
                         />
                     )}
                     style={{ width: '3rem', textAlign: 'center' }}
