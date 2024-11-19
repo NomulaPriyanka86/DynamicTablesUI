@@ -8,7 +8,7 @@ import { ToastContainer } from 'react-toastify'; // Import ToastContainer
 function App() {
   return (
     <>
-      <DynamicTablesUI pageName="user_spins" />
+      <DynamicTablesUI pageName="testing_validations" />
       {/* <PageSchema pageName="player" /> */}
       <ToastContainer />
     </>

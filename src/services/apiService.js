@@ -7,7 +7,9 @@ const api = axios.create({
 const tenantName = 'bluboy';
 
 export const getPageSchema = (pageName) => {
-  return api.get(`/page-schema/${tenantName}/${pageName}`);
+  return api.get(`/page-schema/${tenantName}/${pageName}`, {
+    params: { status: 'active' }, // Adds a query parameter to filter active schemas
+  });
 };
 
 export const getAllPageNames = () => {
@@ -18,4 +20,4 @@ export const getAllTenants = () => {
   return api.get('/tenants');
 };
 
-// Function to get KYC data
+

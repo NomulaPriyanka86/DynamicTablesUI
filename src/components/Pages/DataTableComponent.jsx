@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { FaPencilAlt } from 'react-icons/fa';
 import { Checkbox } from 'primereact/checkbox';
 import ActionButtons from './ActionButtons';
 import { Calendar } from 'primereact/calendar';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';  // Import the CSS for styling
+import { validateField } from './Validations';
 
 // Utility function to format date to DD-MM-YYYY
 const formatDateToDDMMYYYY = (date) => {
@@ -17,12 +19,13 @@ const formatDateToDDMMYYYY = (date) => {
     return `${day}-${month}-${year}`;
 };
 
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit }) => {
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [columnFilters, setColumnFilters] = useState({});
     const [initialValue, setInitialValue] = useState(null);
+    const toastRef = useRef(null);
 
     // Handle row selection
     const handleRowSelect = (rowData) => {
@@ -105,74 +108,30 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                     onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
                                     onBlur={(e) => {
                                         const newValue = e.target.value;
+                                        const validationMessage = validateField(newValue, col.name, schema);
 
-                                        // Only process if the new value is different from the initial value
-                                        if (newValue !== initialValue) {
-                                            if (col.type === 'Date') {
-                                                // Validate and parse the input date in DD-MM-YYYY format
-                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-                                                const match = newValue.match(dateRegex);
-
-                                                if (match) {
-                                                    const [_, day, month, year] = match;
-                                                    const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD format
-
-                                                    const parsedDate = new Date(formattedDate);
-
-                                                    // If it's a valid date, save it in YYYY-MM-DD format
-                                                    if (!isNaN(parsedDate)) {
-                                                        // Call handleEdit with the date in the correct format (YYYY-MM-DD)
-                                                        handleEdit(parsedDate.toISOString().split('T')[0], col.name, rowData.id); // Send date in YYYY-MM-DD format
-
-                                                        // Show toast with the formatted date in DD-MM-YYYY
-                                                        const formattedToastDate = formatDateToDDMMYYYY(parsedDate);
-                                                        toast.success(`Date updated to: ${formattedToastDate}`);
-                                                    } else {
-                                                        console.error('Invalid date format');
-                                                    }
-                                                } else {
-                                                    console.error('Invalid date format');
-                                                }
-                                            } else {
-                                                // Handle non-date fields
-                                                handleEdit(newValue, col.name, rowData.id);
-                                            }
+                                        if (validationMessage !== true) {
+                                            toast.error(validationMessage, {
+                                                position: "top-right",
+                                                autoClose: 2000,
+                                            });
+                                        } else {
+                                            handleEdit(newValue, col.name, rowData.id);
                                         }
-
                                         setEditingCell(null);
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             const newValue = e.target.value;
+                                            const validationMessage = validateField(newValue, col.name, schema);
 
-                                            if (newValue !== initialValue) {
-                                                if (col.type === 'Date') {
-                                                    // Validate and parse the input date in DD-MM-YYYY format
-                                                    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-                                                    const match = newValue.match(dateRegex);
-
-                                                    if (match) {
-                                                        const [_, day, month, year] = match;
-                                                        const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD format
-
-                                                        const parsedDate = new Date(formattedDate);
-
-                                                        if (!isNaN(parsedDate)) {
-                                                            // Save the date in YYYY-MM-DD format
-                                                            handleEdit(parsedDate.toISOString().split('T')[0], col.name, rowData.id);
-
-                                                            // Show toast with the formatted date
-                                                            const formattedToastDate = formatDateToDDMMYYYY(parsedDate);
-                                                            toast.success(`Date updated to: ${formattedToastDate}`);
-                                                        } else {
-                                                            console.error('Invalid date format');
-                                                        }
-                                                    } else {
-                                                        console.error('Invalid date format');
-                                                    }
-                                                } else {
-                                                    handleEdit(newValue, col.name, rowData.id);
-                                                }
+                                            if (validationMessage !== true) {
+                                                toast.error(validationMessage, {
+                                                    position: "top-right",
+                                                    autoClose: 2000,
+                                                });
+                                            } else {
+                                                handleEdit(newValue, col.name, rowData.id);
                                             }
                                             setEditingCell(null);
                                         }

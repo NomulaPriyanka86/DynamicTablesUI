@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPageSchema } from '../services/apiService';
-import sampleData from '../data/sampleMockData.json';
+import sampleData from '../data/sampleMockData3.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
 import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
@@ -10,6 +10,7 @@ import { Toast } from 'primereact/toast'; // Import Toast component
 import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
 import { validateField } from './Pages/Validations';
 import { getKycData, getUserSpins } from '../services/dataService';
+import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStorage.js'
 
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
@@ -23,6 +24,7 @@ const DynamicTablesUI = ({ pageName }) => {
     const toast = useRef(null); // Create a toast reference
 
     const handleEdit = (newValue, colName, rowId) => {
+        console.log('Editing:', { newValue, colName, rowId });
         // Find the row to check if the value is actually different
         const row = data.find(row => row.id === rowId);
         const oldValue = row[colName];
@@ -50,6 +52,9 @@ const DynamicTablesUI = ({ pageName }) => {
             setData(updatedData);
             setFilteredData(updatedData); // Directly reapply the updated data
 
+            // Save the updated data to localStorage using the utility function
+            saveToLocalStorage('tableData', updatedData);
+
             // Display a success toast when data is updated
             toast.current.show({
                 severity: 'success',
@@ -67,8 +72,10 @@ const DynamicTablesUI = ({ pageName }) => {
                 const schemaData = schemaResponse.data;
                 setSchema(schemaData);
                 setSelectedColumns(schemaData.columns);
+                // Load table data from localStorage if available
+                loadFromLocalStorage('tableData');
 
-                // const kycResponse = await getUserSpins();
+                // const kycResponse = await getKycData();
                 // const kycData = kycResponse.data;
                 // console.log('KYC Data Array:', kycData.data);
 
@@ -100,7 +107,8 @@ const DynamicTablesUI = ({ pageName }) => {
 
                         return isValidRow ? parsedRow : null; // Only return row if it's valid
                     }).filter(row => row !== null); // Remove any invalid rows
-
+                    // Save fetched data to localStorage
+                    saveToLocalStorage('tableData', parsedData);
                     setData(parsedData);
                     setFilteredData(parsedData); // Set initial filtered data
                 } else {
@@ -127,14 +135,14 @@ const DynamicTablesUI = ({ pageName }) => {
         });
         setFilteredData(filtered);
     };
-
     useEffect(() => {
         if (globalFilter) {
             filterData(globalFilter);
         } else {
             setFilteredData(data);
         }
-    }, [data, globalFilter]); // Re-run the effect when data or globalFilter changes
+    }, [data, globalFilter]);
+
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
@@ -212,6 +220,7 @@ const DynamicTablesUI = ({ pageName }) => {
                     selectedColumns={selectedColumns}
                     handleEdit={handleEdit}
                     toast={toast}
+                    schema={schema}
                 />
             )}
         </div>

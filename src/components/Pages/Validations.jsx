@@ -6,7 +6,7 @@ export const validateField = (value, colName, schema) => {
     if (!column) return 'Column schema not found';
 
     // Validation for strings with minimum and maximum length
-    if (column.type === 'string') {
+    if (column.type === 'String') {
         // Check if value is empty or invalid for strings
         if (typeof value !== 'string' || value.trim() === '') {
             return `${colName} must be a non-empty string`;
@@ -24,7 +24,7 @@ export const validateField = (value, colName, schema) => {
     }
 
     // Validation for numbers
-    if (column.type === 'integer') {
+    if (column.type === 'Integer') {
         // Check if value is empty
         if (value.trim() === '') {
             return `${colName} cannot be empty`;
@@ -40,25 +40,31 @@ export const validateField = (value, colName, schema) => {
             return `${colName} must be a positive number`;
         }
 
-        // Check if the number has at least 2 digits and at most 10 digits
-        if (value.length < 2 || value.length > 10) {
-            return `${colName} must have between 2 and 10 digits`;
+        // Check if the number has at least 1 digit and at most 10 digits
+        if (value.length < 1 || value.length > 10) {
+            return `${colName} must have between 1 and 10 digits`;
         }
     }
 
-    // Validation for dates
-    if (column.type === 'date') {
-        // Check if value is empty
-        if (value.trim() === '') {
+    // Validation for date format (DD-MM-YYYY)
+    if (column.type === 'Date') {
+        if (!value) {
             return `${colName} cannot be empty`;
         }
+        const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+        const match = value.match(dateRegex);
 
-        // Check if value is a valid date
-        const dateValue = new Date(value);
-        if (isNaN(dateValue.getTime())) {
-            return `${colName} must be a valid date`;
+        if (match) {
+            const [_, day, month, year] = match;
+            const parsedDate = new Date(`${month}-${day}-${year}`);
+            if (isNaN(parsedDate)) {
+                return `${colName} must be a valid date`;
+            }
+        } else {
+            return `${colName} must be in DD-MM-YYYY format`;
         }
     }
+
     // If all validations pass, return true
     return true;
 };
