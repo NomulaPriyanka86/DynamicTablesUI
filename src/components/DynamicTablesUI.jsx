@@ -22,6 +22,8 @@ const DynamicTablesUI = ({ pageName }) => {
     const [rows, setRows] = useState(10);
     const [filteredData, setFilteredData] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
+    const [sortField, setSortField] = useState(null);
+    const [sortOrder, setSortOrder] = useState(null);
     const toast = useRef(null); // Create a toast reference
 
     const handleEdit = (newValue, colName, rowId) => {
@@ -144,6 +146,10 @@ const DynamicTablesUI = ({ pageName }) => {
         }
     }, [data, globalFilter]);
 
+    const resetSorting = () => {
+        setSortField(null);
+        setSortOrder(null);
+    };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
@@ -174,6 +180,7 @@ const DynamicTablesUI = ({ pageName }) => {
                     data={data}
                     schema={schema}
                     setSelectedRows={setSelectedRows}
+                    resetSorting={resetSorting}
                 />
             </div>
 
@@ -225,6 +232,10 @@ const DynamicTablesUI = ({ pageName }) => {
                     schema={schema}
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
+                    sortField={sortField}
+                    setSortField={setSortField}
+                    sortOrder={sortOrder}
+                    setSortOrder={setSortOrder}
                 />
             )}
         </div>

@@ -19,7 +19,10 @@ const formatDateToDDMMYYYY = (date) => {
     return `${day}-${month}-${year}`;
 };
 
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows }) => {
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows, sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [columnFilters, setColumnFilters] = useState({});
@@ -256,6 +259,12 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 onSelectionChange={(e) => setSelectedRows(e.value)}  // Updates the selected rows when checkboxes are clicked
                 dataKey="id"
                 removableSort
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={(e) => {
+                    setSortField(e.sortField);
+                    setSortOrder(e.sortOrder);
+                }}
             >
                 <Column
                     header={
