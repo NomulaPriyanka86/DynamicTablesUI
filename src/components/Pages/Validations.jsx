@@ -56,12 +56,14 @@ export const validateField = (value, colName, schema) => {
 
         if (match) {
             const [_, day, month, year] = match;
-            const parsedDate = new Date(`${month}-${day}-${year}`);
+            const formattedDate = `${day}-${month}-${month}`; // Convert to DD-MM-YYYY for `Date` object
+
+            const parsedDate = new Date(formattedDate);
             if (isNaN(parsedDate)) {
-                return `${colName} must be a valid date`;
+                return 'The date format is incorrect. Please enter a valid date.';
             }
         } else {
-            return `${colName} must be in DD-MM-YYYY format`;
+            return 'Please enter the date in DD-MM-YYYY format.';
         }
     }
 

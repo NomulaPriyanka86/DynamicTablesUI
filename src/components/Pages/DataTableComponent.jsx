@@ -94,6 +94,11 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         setHoveredCell(null);
                     };
 
+                    // // Log the value to inspect the date
+                    // if (col.type === 'Date') {
+                    //     console.log('Original Date Value:', value); // This will log the raw date value from your data
+                    // }
+
                     return (
                         <div
                             style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
@@ -116,10 +121,34 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                                 autoClose: 2000,
                                             });
                                         } else {
-                                            handleEdit(newValue, col.name, rowData.id);
+                                            // For date columns, format the value to a standard format (DD-MM-YYYY)
+                                            if (col.type === 'Date') {
+                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // DD-MM-YYYY format
+                                                const match = newValue.match(dateRegex);
+
+                                                if (match) {
+                                                    const [_, day, month, year] = match;
+
+                                                    // Ensure that day and month are correctly formatted as DD-MM-YYYY
+                                                    const formattedDate = `${day}-${month}-${year}`; // Keep DD-MM-YYYY intact
+
+                                                    // Log the formatted date for debugging
+                                                    console.log("Formatted Date:", formattedDate);
+
+                                                    handleEdit(formattedDate, col.name, rowData.id); // Pass the formatted date to handleEdit
+                                                } else {
+                                                    toast.error('Invalid date format. Please use DD-MM-YYYY.', {
+                                                        position: "top-right",
+                                                        autoClose: 2000,
+                                                    });
+                                                }
+                                            } else {
+                                                handleEdit(newValue, col.name, rowData.id); // For non-date fields
+                                            }
                                         }
                                         setEditingCell(null);
                                     }}
+
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             const newValue = e.target.value;
@@ -128,14 +157,37 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                             if (validationMessage !== true) {
                                                 toast.error(validationMessage, {
                                                     position: "top-right",
-                                                    autoClose: 2000,
                                                 });
                                             } else {
-                                                handleEdit(newValue, col.name, rowData.id);
+                                                if (col.type === 'Date') {
+                                                    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // DD-MM-YYYY format
+                                                    const match = newValue.match(dateRegex);
+
+                                                    if (match) {
+                                                        const [_, day, month, year] = match;
+
+                                                        // Ensure that day and month are correctly formatted as DD-MM-YYYY
+                                                        const formattedDate = `${day}-${month}-${year}`; // Keep DD-MM-YYYY intact
+
+                                                        // Log the formatted date for debugging
+                                                        console.log("Formatted Date on Key Down:", formattedDate);
+
+                                                        handleEdit(formattedDate, col.name, rowData.id); // Pass the formatted date to handleEdit
+                                                    } else {
+                                                        toast.error('Invalid date format. Please use DD-MM-YYYY.', {
+                                                            position: "top-right",
+                                                            autoClose: 2000,
+                                                        });
+                                                    }
+                                                } else {
+                                                    handleEdit(newValue, col.name, rowData.id); // For non-date fields
+                                                }
                                             }
                                             setEditingCell(null);
                                         }
                                     }}
+
+
                                 />
                             ) : (
                                 <>
