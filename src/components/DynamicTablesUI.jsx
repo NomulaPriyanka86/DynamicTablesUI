@@ -204,7 +204,9 @@ const DynamicTablesUI = ({ pageName }) => {
                         {filteredData.length === 0 || filteredData.every(row => Object.values(row).every(value => !value)) ? (
                             // If no data or all data is mismatched (empty or falsy), display only the headers
                             <tr>
-                                <td colSpan={selectedColumns.length} className="no-data">No data available</td>
+                                <td colSpan={selectedColumns.length} className="no-data">
+                                    <span style={{ color: 'red' }}>No matching data found</span>
+                                </td>
                             </tr>
                         ) : (
                             // If data is available and not mismatched, display the table rows
