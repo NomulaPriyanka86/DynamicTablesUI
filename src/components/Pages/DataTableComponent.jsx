@@ -19,10 +19,9 @@ const formatDateToDDMMYYYY = (date) => {
     return `${day}-${month}-${year}`;
 };
 
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema }) => {
+export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
-    const [selectedRows, setSelectedRows] = useState([]);
     const [columnFilters, setColumnFilters] = useState({});
     const [initialValue, setInitialValue] = useState(null);
     const toastRef = useRef(null);

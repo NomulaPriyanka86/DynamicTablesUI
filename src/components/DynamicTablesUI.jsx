@@ -21,6 +21,7 @@ const DynamicTablesUI = ({ pageName }) => {
     const [globalFilter, setGlobalFilter] = useState('');
     const [rows, setRows] = useState(10);
     const [filteredData, setFilteredData] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
     const toast = useRef(null); // Create a toast reference
 
     const handleEdit = (newValue, colName, rowId) => {
@@ -172,6 +173,7 @@ const DynamicTablesUI = ({ pageName }) => {
                     setFilteredData={setFilteredData}
                     data={data}
                     schema={schema}
+                    setSelectedRows={setSelectedRows}
                 />
             </div>
 
@@ -221,6 +223,8 @@ const DynamicTablesUI = ({ pageName }) => {
                     handleEdit={handleEdit}
                     toast={toast}
                     schema={schema}
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
                 />
             )}
         </div>
