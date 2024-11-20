@@ -8,17 +8,22 @@ import { Calendar } from 'primereact/calendar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';  // Import the CSS for styling
 import { validateField } from './Validations';
+function formatDateToDDMMYYYY(date) {
+    if (typeof date === 'string' && date.includes('-')) {
+        // Assume the input is in DD-MM-YYYY format already
+        return date;
+    }
 
-// Utility function to format date to DD-MM-YYYY
-const formatDateToDDMMYYYY = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-};
+    // If it's a Date object, format it
+    if (date instanceof Date && !isNaN(date)) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
 
+    return '';
+}
 export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows, sortField,
     setSortField,
     sortOrder,
@@ -96,11 +101,6 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                         setHoveredCell(null);
                     };
 
-                    // // Log the value to inspect the date
-                    // if (col.type === 'Date') {
-                    //     console.log('Original Date Value:', value); // This will log the raw date value from your data
-                    // }
-
                     return (
                         <div
                             style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
@@ -108,36 +108,45 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                             onMouseLeave={handleMouseLeave}
                         >
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
-                                <input
-                                    type="text"
-                                    defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || ''}
-                                    autoFocus
-                                    onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
-                                    onBlur={(e) => {
-                                        const newValue = e.target.value;
-                                        const validationMessage = validateField(newValue, col.name, schema);
+                                col.type === 'Date' ? (
+                                    // Calendar component for selecting date
+                                    <Calendar
+                                        value={
+                                            value && typeof value === 'string'
+                                                ? new Date(value.split('-').reverse().join('-')) // Convert string to Date object
+                                                : value instanceof Date
+                                                    ? value
+                                                    : null
+                                        }
+                                        onChange={(e) => {
+                                            if (e.value) {
+                                                // Format date as DD-MM-YYYY after selecting from calendar
+                                                const day = String(e.value.getDate()).padStart(2, '0');
+                                                const month = String(e.value.getMonth() + 1).padStart(2, '0');
+                                                const year = e.value.getFullYear();
+                                                const formattedDate = `${day}-${month}-${year}`;
 
-                                        if (validationMessage !== true) {
-                                            toast.error(validationMessage, {
-                                                position: "top-right",
-                                                autoClose: 2000,
-                                            });
-                                        } else {
-                                            // For date columns, format the value to a standard format (DD-MM-YYYY)
+                                                handleEdit(formattedDate, col.name, rowData.id); // Update with formatted date
+                                            }
+                                            setEditingCell(null); // Close the edit mode
+                                        }}
+                                        dateFormat="dd-mm-yy"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <input
+                                        type="text"
+                                        defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || ''}
+                                        autoFocus
+                                        onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
+                                        onBlur={(e) => {
+                                            const newValue = e.target.value;
+
+                                            // Date validation and formatting
+                                            const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches DD-MM-YYYY
                                             if (col.type === 'Date') {
-                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // DD-MM-YYYY format
-                                                const match = newValue.match(dateRegex);
-
-                                                if (match) {
-                                                    const [_, day, month, year] = match;
-
-                                                    // Ensure that day and month are correctly formatted as DD-MM-YYYY
-                                                    const formattedDate = `${day}-${month}-${year}`; // Keep DD-MM-YYYY intact
-
-                                                    // Log the formatted date for debugging
-                                                    console.log("Formatted Date:", formattedDate);
-
-                                                    handleEdit(formattedDate, col.name, rowData.id); // Pass the formatted date to handleEdit
+                                                if (dateRegex.test(newValue)) {
+                                                    handleEdit(newValue, col.name, rowData.id); // Pass the formatted date
                                                 } else {
                                                     toast.error('Invalid date format. Please use DD-MM-YYYY.', {
                                                         position: "top-right",
@@ -145,36 +154,27 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                                     });
                                                 }
                                             } else {
-                                                handleEdit(newValue, col.name, rowData.id); // For non-date fields
+                                                // Non-date field validation
+                                                const validationMessage = validateField(newValue, col.name, schema);
+                                                if (validationMessage !== true) {
+                                                    toast.error(validationMessage, {
+                                                        position: "top-right",
+                                                    });
+                                                } else {
+                                                    handleEdit(newValue, col.name, rowData.id); // Update with non-date value
+                                                }
                                             }
-                                        }
-                                        setEditingCell(null);
-                                    }}
+                                            setEditingCell(null); // Close the edit mode
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const newValue = e.target.value;
 
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const newValue = e.target.value;
-                                            const validationMessage = validateField(newValue, col.name, schema);
-
-                                            if (validationMessage !== true) {
-                                                toast.error(validationMessage, {
-                                                    position: "top-right",
-                                                });
-                                            } else {
+                                                // Date validation and formatting on Enter key
+                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches DD-MM-YYYY
                                                 if (col.type === 'Date') {
-                                                    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // DD-MM-YYYY format
-                                                    const match = newValue.match(dateRegex);
-
-                                                    if (match) {
-                                                        const [_, day, month, year] = match;
-
-                                                        // Ensure that day and month are correctly formatted as DD-MM-YYYY
-                                                        const formattedDate = `${day}-${month}-${year}`; // Keep DD-MM-YYYY intact
-
-                                                        // Log the formatted date for debugging
-                                                        console.log("Formatted Date on Key Down:", formattedDate);
-
-                                                        handleEdit(formattedDate, col.name, rowData.id); // Pass the formatted date to handleEdit
+                                                    if (dateRegex.test(newValue)) {
+                                                        handleEdit(newValue, col.name, rowData.id); // Pass the formatted date
                                                     } else {
                                                         toast.error('Invalid date format. Please use DD-MM-YYYY.', {
                                                             position: "top-right",
@@ -182,15 +182,21 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                                         });
                                                     }
                                                 } else {
-                                                    handleEdit(newValue, col.name, rowData.id); // For non-date fields
+                                                    // Non-date field validation
+                                                    const validationMessage = validateField(newValue, col.name, schema);
+                                                    if (validationMessage !== true) {
+                                                        toast.error(validationMessage, {
+                                                            position: "top-right",
+                                                        });
+                                                    } else {
+                                                        handleEdit(newValue, col.name, rowData.id); // Update with non-date value
+                                                    }
                                                 }
+                                                setEditingCell(null); // Close the edit mode
                                             }
-                                            setEditingCell(null);
-                                        }
-                                    }}
-
-
-                                />
+                                        }}
+                                    />
+                                )
                             ) : (
                                 <>
                                     {col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}

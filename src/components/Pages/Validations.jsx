@@ -51,12 +51,15 @@ export const validateField = (value, colName, schema) => {
         if (!value) {
             return `${colName} cannot be empty`;
         }
+
         const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
         const match = value.match(dateRegex);
 
         if (match) {
             const [_, day, month, year] = match;
-            const formattedDate = `${day}-${month}-${month}`; // Convert to DD-MM-YYYY for `Date` object
+
+            // Ensure that formattedDate is constructed in the proper order (DD-MM-YYYY)
+            const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD for creating a `Date` object
 
             const parsedDate = new Date(formattedDate);
             if (isNaN(parsedDate)) {

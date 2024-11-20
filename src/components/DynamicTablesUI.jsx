@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for r
 import { validateField } from './Pages/Validations';
 import { getKycData, getUserSpins } from '../services/dataService';
 import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStorage.js'
-
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -157,9 +156,7 @@ const DynamicTablesUI = ({ pageName }) => {
     return (
         <div>
             <Toast ref={toast} /> {/* Add Toast component */}
-
             <h1>Page Schema for {pageName}</h1>
-
             <div className="p-d-flex p-ai-center">
                 <RowsPerPage
                     rows={rows}
@@ -167,7 +164,6 @@ const DynamicTablesUI = ({ pageName }) => {
                     filteredData={filteredData}
                 />
             </div>
-
             <div className="p-d-flex p-ai-center p-mb-3">
                 <GlobalSearch
                     globalFilter={globalFilter}
@@ -183,13 +179,11 @@ const DynamicTablesUI = ({ pageName }) => {
                     resetSorting={resetSorting}
                 />
             </div>
-
             <ColumnToggle
                 schema={schema}
                 selectedColumns={selectedColumns}
                 setSelectedColumns={setSelectedColumns}
             />
-
             {/* Conditional rendering of the table headers or a no data message */}
             {filteredData.length === 0 ? (
                 <table className="p-d-table">
@@ -220,8 +214,6 @@ const DynamicTablesUI = ({ pageName }) => {
                         )}
                     </tbody>
                 </table>
-
-
             ) : (
                 <DataTableComponent
                     filteredData={filteredData}
@@ -243,5 +235,4 @@ const DynamicTablesUI = ({ pageName }) => {
         </div>
     );
 };
-
 export default DynamicTablesUI;
