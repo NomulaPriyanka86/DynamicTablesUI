@@ -10,7 +10,7 @@ export const GlobalSearch = ({ globalFilter, setGlobalFilter, filterData }) => {
                 filterData(e.target.value);
             }}
             placeholder="Global Search"
-            style={{ width: '20em', marginRight: '1em' }}
+            style={{ width: '20em', marginRight: '1em', marginBottom: '1em' }}
         />
     );
 };

@@ -2,6 +2,7 @@ import { Button } from 'primereact/button';
 import React from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { saveToLocalStorage } from '../../services/localStorage';
 
 const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFilteredData }) => {
     const updateStatus = (status) => {
@@ -19,8 +20,9 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
             }
             return dataRow;
         });
-
+        console.log('Updated Filtered Data:', updatedFilteredData);
         setFilteredData(updatedFilteredData);
+        saveToLocalStorage('tableData', updatedFilteredData);
         setSelectedRows([]);
 
         if (statusChanged) {

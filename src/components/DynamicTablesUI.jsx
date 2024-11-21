@@ -19,7 +19,7 @@ const DynamicTablesUI = ({ pageName }) => {
     const [selectedColumns, setSelectedColumns] = useState([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rows, setRows] = useState(10);
-    const [filteredData, setFilteredData] = useState([]);
+    const [filteredData, setFilteredData] = useState(loadFromLocalStorage());
     const [selectedRows, setSelectedRows] = useState([]);
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState(null);
@@ -50,12 +50,13 @@ const DynamicTablesUI = ({ pageName }) => {
                 return row;
             });
 
+            // Save the updated data to localStorage using the utility function
+            saveToLocalStorage('tableData', updatedData);
+
             // Update both data and filteredData
             setData(updatedData);
             setFilteredData(updatedData); // Directly reapply the updated data
 
-            // Save the updated data to localStorage using the utility function
-            saveToLocalStorage('tableData', updatedData);
 
             // Display a success toast when data is updated
             toast.current.show({
@@ -139,9 +140,9 @@ const DynamicTablesUI = ({ pageName }) => {
     };
     useEffect(() => {
         if (globalFilter) {
-            filterData(globalFilter);
+            filterData(globalFilter); // Apply global filter if it exists
         } else {
-            setFilteredData(data);
+            setFilteredData(data); // Reset to original data if no filter
         }
     }, [data, globalFilter]);
 

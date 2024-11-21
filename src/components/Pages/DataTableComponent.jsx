@@ -274,12 +274,12 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
             >
                 <Column
                     header={
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ alignItems: 'center', width: '6rem' }}>
+                            <div style={{ marginBottom: '10px' }}>Select All</div>
                             <Checkbox
                                 checked={selectedRows.length === filteredData.length}
                                 onChange={handleSelectAll}  // "Select All" functionality
                             />
-                            <span style={{ marginLeft: '5px' }}>Select All</span>
                         </div>
                     }
                     body={(rowData) => (

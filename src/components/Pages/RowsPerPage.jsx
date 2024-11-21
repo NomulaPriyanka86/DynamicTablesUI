@@ -7,7 +7,7 @@ export const RowsPerPage = ({ rows, setRows, filteredData }) => {
     };
 
     return (
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
             <label htmlFor="rows-per-page" className="p-mr-2">Rows per page:</label>
             <input
                 type="number"
