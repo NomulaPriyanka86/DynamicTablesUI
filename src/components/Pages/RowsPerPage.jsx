@@ -18,7 +18,7 @@ export const RowsPerPage = ({ rows, setRows, filteredData }) => {
                 max={filteredData.length}
                 step={1}
                 className="mr-2"
-                style={{ width: '5em' }}
+                style={{ width: '3.5em' }}
             />
         </div>
     );

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { saveToLocalStorage } from '../../services/localStorage';
 
-const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFilteredData }) => {
+const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFilteredData, setData }) => {
     const updateStatus = (status) => {
         let statusChanged = false;
         const updatedFilteredData = filteredData.map(dataRow => {
@@ -21,6 +21,7 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
             return dataRow;
         });
         console.log('Updated Filtered Data:', updatedFilteredData);
+        setData(updatedFilteredData);
         setFilteredData(updatedFilteredData);
         saveToLocalStorage('tableData', updatedFilteredData);
         setSelectedRows([]);

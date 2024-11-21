@@ -19,7 +19,7 @@ const DynamicTablesUI = ({ pageName }) => {
     const [selectedColumns, setSelectedColumns] = useState([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rows, setRows] = useState(10);
-    const [filteredData, setFilteredData] = useState(loadFromLocalStorage());
+    const [filteredData, setFilteredData] = useState();
     const [selectedRows, setSelectedRows] = useState([]);
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState(null);
@@ -231,6 +231,7 @@ const DynamicTablesUI = ({ pageName }) => {
                     setSortField={setSortField}
                     sortOrder={sortOrder}
                     setSortOrder={setSortOrder}
+                    setData={setData}
                 />
             )}
         </div>

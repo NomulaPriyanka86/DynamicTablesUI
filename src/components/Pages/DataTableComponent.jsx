@@ -27,7 +27,7 @@ function formatDateToDDMMYYYY(date) {
 export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows, sortField,
     setSortField,
     sortOrder,
-    setSortOrder }) => {
+    setSortOrder, setData }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [columnFilters, setColumnFilters] = useState({});
@@ -251,6 +251,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 setSelectedRows={setSelectedRows}
                 filteredData={filteredData}
                 setFilteredData={setFilteredData}
+                setData={setData}
             />
             <ToastContainer />
 
