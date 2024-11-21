@@ -136,24 +136,12 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                 ) : (
                                     <input
                                         type="text"
-                                        defaultValue={col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || ''}
+                                        defaultValue={value || ''}
                                         autoFocus
-                                        onFocus={() => setInitialValue(col.type === 'Date' ? formatDateToDDMMYYYY(value) : value || '')}
+                                        onFocus={() => setInitialValue(value || '')}
                                         onBlur={(e) => {
                                             const newValue = e.target.value;
-
-                                            // Date validation and formatting
-                                            const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches DD-MM-YYYY
-                                            if (col.type === 'Date') {
-                                                if (dateRegex.test(newValue)) {
-                                                    handleEdit(newValue, col.name, rowData.id); // Pass the formatted date
-                                                } else {
-                                                    toast.error('Invalid date format. Please use DD-MM-YYYY.', {
-                                                        position: "top-right",
-                                                        autoClose: 2000,
-                                                    });
-                                                }
-                                            } else {
+                                            if (col.type !== 'Date') {
                                                 // Non-date field validation
                                                 const validationMessage = validateField(newValue, col.name, schema);
                                                 if (validationMessage !== true) {
@@ -169,19 +157,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 const newValue = e.target.value;
-
-                                                // Date validation and formatting on Enter key
-                                                const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches DD-MM-YYYY
-                                                if (col.type === 'Date') {
-                                                    if (dateRegex.test(newValue)) {
-                                                        handleEdit(newValue, col.name, rowData.id); // Pass the formatted date
-                                                    } else {
-                                                        toast.error('Invalid date format. Please use DD-MM-YYYY.', {
-                                                            position: "top-right",
-                                                            autoClose: 2000,
-                                                        });
-                                                    }
-                                                } else {
+                                                if (col.type !== 'Date') {
                                                     // Non-date field validation
                                                     const validationMessage = validateField(newValue, col.name, schema);
                                                     if (validationMessage !== true) {
