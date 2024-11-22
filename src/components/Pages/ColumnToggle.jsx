@@ -13,9 +13,12 @@ export const ColumnToggle = ({ schema, selectedColumns, setSelectedColumns }) =>
             options={schema ? schema.columns : []}
             optionLabel="name"
             onChange={onColumnToggle}
-            placeholder="Select Columns to Show"
-            style={{ width: '80em' }}
+            // placeholder="Toggle the Columns to Show/hide"
+            style={{ width: '15em' }}
             display="chip"
+            selectedItemTemplate={() => (
+                <span style={{ color: 'gray' }}>Columns to Show/Hide</span>
+            )} // Always show the placeholder
         />
     );
 };

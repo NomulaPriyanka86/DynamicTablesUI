@@ -11,6 +11,38 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-family: Arial, Helvetica, sans-serif;
 }
+.toolbar {
+  display: flex; /* Align children in a row */
+  align-items: center; /* Vertically align items */
+  justify-content: space-between; /* Space between left and right sections */
+  padding: 10px; /* Optional: Add some padding */
+  gap: 5px; /* Optional: Add spacing between items */
+}
+
+.toolbar > :nth-child(1),
+.toolbar > :nth-child(2) {
+  margin-right: auto; /* Push RowsPerPage and ColumnToggle to the left */
+}
+
+.toolbar > :nth-child(3),
+.toolbar > :nth-child(4) {
+  margin-left: 10px; /* Push GlobalSearch and ClearFiltersButton to the right */
+}
+.rows-per-page-container {
+  display: flex;
+  align-items: center; /* Ensures vertical alignment */
+}
+
+.rows-per-page-container label {
+  margin-right: 0; /* No margin between label and input */
+}
+
+.rows-per-page-container input {
+  margin-left: 0; /* No margin between input and label */
+  width: 4em; /* Optional: Adjust width of input for better fit */
+}
+
+
 .p-multiselect {
   width: 100%;
   margin: 5px;

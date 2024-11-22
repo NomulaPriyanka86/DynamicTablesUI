@@ -7,8 +7,8 @@ export const RowsPerPage = ({ rows, setRows, filteredData }) => {
     };
 
     return (
-        <div style={{ marginBottom: '1rem' }}>
-            <label htmlFor="rows-per-page" className="p-mr-2">Rows per page:</label>
+        <div className="rows-per-page-container">
+            <label htmlFor="rows-per-page">Rows per page:</label>
             <input
                 type="number"
                 id="rows-per-page"
@@ -17,8 +17,6 @@ export const RowsPerPage = ({ rows, setRows, filteredData }) => {
                 min={1}
                 max={filteredData.length}
                 step={1}
-                className="mr-2"
-                style={{ width: '3.5em' }}
             />
         </div>
     );

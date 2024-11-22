@@ -159,14 +159,17 @@ const DynamicTablesUI = ({ pageName }) => {
         <div>
             <Toast ref={toast} /> {/* Add Toast component */}
             <h1>Page Schema for {pageName}</h1>
-            <div className="p-d-flex p-ai-center">
+            <div className="toolbar">
                 <RowsPerPage
                     rows={rows}
                     setRows={setRows}
                     filteredData={filteredData}
                 />
-            </div>
-            <div className="p-d-flex p-ai-center p-mb-3">
+                <ColumnToggle
+                    schema={schema}
+                    selectedColumns={selectedColumns}
+                    setSelectedColumns={setSelectedColumns}
+                />
                 <GlobalSearch
                     globalFilter={globalFilter}
                     setGlobalFilter={setGlobalFilter}
@@ -181,11 +184,6 @@ const DynamicTablesUI = ({ pageName }) => {
                     resetSorting={resetSorting}
                 />
             </div>
-            <ColumnToggle
-                schema={schema}
-                selectedColumns={selectedColumns}
-                setSelectedColumns={setSelectedColumns}
-            />
             {/* Conditional rendering of the table headers or a no data message */}
             {filteredData.length === 0 ? (
                 <table className="p-d-table">

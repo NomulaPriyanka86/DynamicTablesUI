@@ -4,6 +4,7 @@ import DynamicTablesUI from './components/DynamicTablesUI'
 import PageSchema from './components/PageSchema'
 import React from 'react'
 import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'primeicons/primeicons.css';
 
 function App() {
   return (
