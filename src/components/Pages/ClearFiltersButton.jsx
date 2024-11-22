@@ -10,6 +10,6 @@ export const ClearFiltersButton = ({ setGlobalFilter, setFilteredData, data, sch
     };
 
     return (
-        <Button label="Clear Filters" icon="pi pi-times" onClick={clearFilters} style={{ marginRight: '1em', marginBottom: '1em' }} />
+        <Button label="Clear Search" icon="pi pi-times" onClick={clearFilters} style={{ marginRight: '1em', marginBottom: '1em' }} />
     );
 };

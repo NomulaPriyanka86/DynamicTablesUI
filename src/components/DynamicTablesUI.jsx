@@ -78,15 +78,16 @@ const DynamicTablesUI = ({ pageName }) => {
                 // Load table data from localStorage if available
                 loadFromLocalStorage('tableData');
 
-                // const kycResponse = await getKycData();
-                // const kycData = kycResponse.data;
-                // console.log('KYC Data Array:', kycData.data);
+                const kycResponse = await getKycData();
+                const kycData = kycResponse.data;
+                console.log('KYC Data Array:', kycData.data);
 
                 // Use sample data instead of the API call
-                const kycData = sampleData; // Assuming sampleData is an array of objects
+                // const kycData = sampleData; // Assuming sampleData is an array of objects
+                // console.log('KYC Data Array:', kycData);
 
-                if (Array.isArray(kycData)) {
-                    const parsedData = kycData.map(row => {
+                if (Array.isArray(kycData.data)) {
+                    const parsedData = kycData.data.map(row => {
                         const parsedRow = {};
                         parsedRow.id = uuidv4(); // Unique ID for each row
 
