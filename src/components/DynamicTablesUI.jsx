@@ -23,6 +23,7 @@ const DynamicTablesUI = ({ pageName }) => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState(null);
+    const [dateRangeFilter, setDateRangeFilter] = useState(null); // For range calendar filter
     const toast = useRef(null); // Create a toast reference
 
     const handleEdit = (newValue, colName, rowId) => {
@@ -182,6 +183,7 @@ const DynamicTablesUI = ({ pageName }) => {
                     schema={schema}
                     setSelectedRows={setSelectedRows}
                     resetSorting={resetSorting}
+                    setDateRangeFilter={setDateRangeFilter}
                 />
             </div>
             {/* Conditional rendering of the table headers or a no data message */}
@@ -231,6 +233,8 @@ const DynamicTablesUI = ({ pageName }) => {
                     sortOrder={sortOrder}
                     setSortOrder={setSortOrder}
                     setData={setData}
+                    dateRangeFilter={dateRangeFilter}
+                    setDateRangeFilter={setDateRangeFilter}
                 />
             )}
         </div>

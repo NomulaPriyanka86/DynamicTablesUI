@@ -6,8 +6,9 @@ import { Checkbox } from 'primereact/checkbox';
 import ActionButtons from './ActionButtons';
 import { Calendar } from 'primereact/calendar';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';  // Import the CSS for styling
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling
 import { validateField } from './Validations';
+// Function to format dates
 function formatDateToDDMMYYYY(date) {
     if (typeof date === 'string' && date.includes('-')) {
         // Assume the input is in DD-MM-YYYY format already
@@ -24,16 +25,26 @@ function formatDateToDDMMYYYY(date) {
 
     return '';
 }
-export const DataTableComponent = ({ filteredData, setFilteredData, rows, globalFilter, selectedColumns, handleEdit, schema, selectedRows, setSelectedRows, sortField,
+
+export const DataTableComponent = ({
+    filteredData,
+    setFilteredData,
+    rows,
+    globalFilter,
+    selectedColumns,
+    handleEdit,
+    schema,
+    selectedRows,
+    setSelectedRows,
+    sortField,
     setSortField,
     sortOrder,
-    setSortOrder, setData }) => {
+    setSortOrder,
+    setData, dateRangeFilter, setDateRangeFilter
+}) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
-    const [columnFilters, setColumnFilters] = useState({});
     const [initialValue, setInitialValue] = useState(null);
-    const toastRef = useRef(null);
-
     // Handle row selection
     const handleRowSelect = (rowData) => {
         const newSelectedRows = selectedRows.includes(rowData.id)
@@ -50,28 +61,42 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
             setSelectedRows(filteredData.map(row => row.id));
         }
     };
+    const handleRangeFilterChange = (value, columnName) => {
+        console.log('Selected date range:', value); // Log the selected range
+        setDateRangeFilter(value); // Store the selected range in state
 
-    // Handle filter change for date columns
-    const handleDateFilterChange = (value, columnName) => {
-        const formattedFilterDate = formatDateToDDMMYYYY(value);
+        if (value && value.length > 0) {
+            const startDate = value[0]; // Get the start date (first item)
+            let endDate = value[1] || new Date('9999-12-31'); // If no end date, set to a large future date
 
-        setColumnFilters(prevFilters => ({
-            ...prevFilters,
-            [columnName]: formattedFilterDate,
-        }));
+            // Ensure the end date is at the end of the day to include all records on that day
+            endDate = new Date(endDate.setHours(23, 59, 59, 999));
 
-        const filtered = filteredData.filter(row => {
-            const rowValueFormatted = formatDateToDDMMYYYY(row[columnName]);
-            return rowValueFormatted === formattedFilterDate;
-        });
+            // Filter the data based on the selected date range
+            const filtered = filteredData.filter(row => {
+                let rowDate = row[columnName];
 
-        setFilteredData(filtered);
-        // Reset the filter input after applying the filter
-        setColumnFilters((prevFilters) => {
-            const updatedFilters = { ...prevFilters };
-            delete updatedFilters[columnName]; // Clear the current column filter after applying
-            return updatedFilters;
-        });
+                // If rowDate is a string and matches the expected 'DD-MM-YYYY' format, split it
+                if (typeof rowDate === 'string' && rowDate.includes('-')) {
+                    rowDate = new Date(rowDate.split('-').reverse().join('-')); // Convert 'DD-MM-YYYY' to a Date object
+                } else if (rowDate instanceof Date && !isNaN(rowDate)) {
+                    // If it's already a Date object, we can directly use it
+                    rowDate = new Date(rowDate);
+                } else {
+                    return false; // Skip if it's not a valid date format
+                }
+
+                // Compare row date against start and end date
+                const isWithinRange = rowDate >= startDate && rowDate <= endDate;
+                return isWithinRange;
+            });
+
+            setFilteredData(filtered);
+        } else {
+            // Reset filter if no range is selected
+            setFilteredData(filteredData); // Resets the data to original
+            setDateRangeFilter(null); // Clear the range input (this will reset the calendar input)
+        }
     };
 
     const renderColumn = (col) => {
@@ -176,16 +201,18 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                             ) : (
                                 <>
                                     {col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
-                                    {isEditable && (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name || editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
-                                        <FaPencilAlt
-                                            style={{
-                                                cursor: 'pointer',
-                                                marginLeft: '5px',
-                                                visibility: hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ? 'visible' : 'hidden',
-                                            }}
-                                            onClick={() => setEditingCell({ rowIndex, colName: col.name })}
-                                        />
-                                    )}
+                                    {isEditable &&
+                                        (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ||
+                                            editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
+                                            <FaPencilAlt
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    marginLeft: '5px',
+                                                    visibility: hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ? 'visible' : 'hidden',
+                                                }}
+                                                onClick={() => setEditingCell({ rowIndex, colName: col.name })}
+                                            />
+                                        )}
                                 </>
                             )}
                         </div>
@@ -195,15 +222,14 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
                 filterElement={(options) => {
                     if (col.type === 'Date') {
                         return (
-                            <div className="p-inputgroup">
-                                <Calendar
-                                    value={columnFilters[col.name] ? new Date(columnFilters[col.name].split('-').reverse().join('-')) : null}
-                                    onChange={(e) => handleDateFilterChange(e.value, col.name)}
-                                    showIcon
-                                    dateFormat="dd-mm-yy"
-                                    showButtonBar
-                                />
-                            </div>
+                            <Calendar
+                                value={dateRangeFilter}
+                                onChange={(e) => handleRangeFilterChange(e.value, col.name)}
+                                selectionMode="range"
+                                placeholder="Select date range"
+                                dateFormat="dd-mm-yy"
+                                showIcon
+                            />
                         );
                     } else {
                         return (
@@ -232,7 +258,7 @@ export const DataTableComponent = ({ filteredData, setFilteredData, rows, global
             <ToastContainer />
 
             <DataTable
-                value={filteredData.length > 0 ? filteredData : []}  // Conditional rendering for rows
+                value={filteredData.length > 0 ? filteredData : []} // Conditional rendering for rows
                 paginator={true}
                 rows={rows}
                 showGridlines
