@@ -11,6 +11,11 @@ export const ClearFiltersButton = ({ setGlobalFilter, setFilteredData, data, sch
     };
 
     return (
-        <Button label="Clear Search" icon="pi pi-times" onClick={clearFilters} />
+        <Button
+            icon="pi pi-filter-slash"
+            className="p-button-text p-button-rounded p-button-sm"
+            onClick={clearFilters}
+            tooltip="Clear Filters"
+        />
     );
 };

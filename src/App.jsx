@@ -9,7 +9,7 @@ import 'primeicons/primeicons.css';
 function App() {
   return (
     <>
-      <DynamicTablesUI pageName="player" />
+      <DynamicTablesUI pageName="spin_new" />
       {/* <PageSchema pageName="player" /> */}
       <ToastContainer />
     </>

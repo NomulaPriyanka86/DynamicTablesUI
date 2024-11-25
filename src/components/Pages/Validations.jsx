@@ -1,12 +1,12 @@
 export const validateField = (value, colName, schema) => {
     // Find the column schema for the given column name
-    const column = schema.columns.find(col => col.name === colName);
+    const column = schema.find(col => col.name === colName);
 
     // Check if column is defined
     if (!column) return 'Column schema not found';
 
     // Validation for strings with minimum and maximum length
-    if (column.type === 'String') {
+    if (column.type === 'string') {
         // Check if value is empty or invalid for strings
         if (typeof value !== 'string' || value.trim() === '') {
             return `${colName} must be a non-empty string`;
@@ -24,7 +24,7 @@ export const validateField = (value, colName, schema) => {
     }
 
     // Validation for numbers
-    if (column.type === 'Integer') {
+    if (column.type === 'integer') {
         // Check if value is empty
         if (value.trim() === '') {
             return `${colName} cannot be empty`;
@@ -43,6 +43,26 @@ export const validateField = (value, colName, schema) => {
         // Check if the number has at least 1 digit and at most 10 digits
         if (value.length < 1 || value.length > 10) {
             return `${colName} must have between 1 and 10 digits`;
+        }
+    }
+
+
+    // Validation for float numbers
+    if (column.type === 'float') {
+        if (value.trim() === '') {
+            return `${colName} cannot be empty`;
+        }
+        if (isNaN(value)) {
+            return `${colName} must be a valid number`;
+        }
+        const floatValue = parseFloat(value);
+        if (floatValue <= 0) {
+            return `${colName} must be a positive number`;
+        }
+
+        // Check for reasonable decimal places (for example, up to 2 decimal places)
+        if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+            return `${colName} must be a valid float with up to two decimal places`;
         }
     }
 

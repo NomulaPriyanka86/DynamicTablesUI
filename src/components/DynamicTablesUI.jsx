@@ -9,8 +9,10 @@ import { DataTableComponent } from './Pages/DataTableComponent';
 import { Toast } from 'primereact/toast'; // Import Toast component
 import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
 import { validateField } from './Pages/Validations';
-import { getKycData, getUserSpins } from '../services/dataService';
+import { getKycData, getPageData, getUserSpins } from '../services/dataService';
 import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStorage.js'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const DynamicTablesUI = ({ pageName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -28,12 +30,17 @@ const DynamicTablesUI = ({ pageName }) => {
 
     const handleEdit = (newValue, colName, rowId) => {
         console.log('Editing:', { newValue, colName, rowId });
-        // Find the row to check if the value is actually different
-        const row = data.find(row => row.id === rowId);
+
+        // Find the row to edit
+        const row = filteredData.find(row => row.id === rowId);
+        if (!row) {
+            console.error(`Row with id ${rowId} not found.`);
+            return;
+        }
+
         const oldValue = row[colName];
         if (newValue !== oldValue) {
             const validationResult = validateField(newValue, colName, schema);
-
             if (validationResult !== true) {
                 toast.current.show({
                     severity: 'error',
@@ -41,23 +48,23 @@ const DynamicTablesUI = ({ pageName }) => {
                     detail: validationResult,
                     life: 3000,
                 });
-                return; // Exit early if validation fails
+                return; // Exit if validation fails
             }
 
-            const updatedData = data.map(row => {
+            // Create a new array to update state immutably
+            const updatedData = filteredData.map(row => {
                 if (row.id === rowId) {
-                    row[colName] = newValue; // Update only the matching row
+                    return { ...row, [colName]: newValue }; // Update only the matching row
                 }
-                return row;
+                return row; // Return unchanged rows
             });
 
-            // Save the updated data to localStorage using the utility function
+            // Save the updated data to localStorage
             saveToLocalStorage('tableData', updatedData);
 
-            // Update both data and filteredData
-            setData(updatedData);
-            setFilteredData(updatedData); // Directly reapply the updated data
-
+            // Update state immutably
+            setFilteredData(updatedData); // Update filtered data
+            setData(updatedData); // Update the main data
 
             // Display a success toast when data is updated
             toast.current.show({
@@ -72,20 +79,19 @@ const DynamicTablesUI = ({ pageName }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                // Fetch schema and data
                 const schemaResponse = await getPageSchema(pageName);
                 const schemaData = schemaResponse.data;
-                setSchema(schemaData);
-                setSelectedColumns(schemaData.columns);
+                const schemaColumns = schemaData.columns.columns; // Adjust for nested structure
+                setSchema(schemaColumns);
+                setSelectedColumns(schemaColumns);
+
                 // Load table data from localStorage if available
                 loadFromLocalStorage('tableData');
 
-                const kycResponse = await getKycData();
+                const kycResponse = await getPageData(pageName);
                 const kycData = kycResponse.data;
-                console.log('KYC Data Array:', kycData.data);
-
-                // Use sample data instead of the API call
-                // const kycData = sampleData; // Assuming sampleData is an array of objects
-                // console.log('KYC Data Array:', kycData);
+                console.log(JSON.stringify(kycData));
 
                 if (Array.isArray(kycData.data)) {
                     const parsedData = kycData.data.map(row => {
@@ -94,9 +100,9 @@ const DynamicTablesUI = ({ pageName }) => {
 
                         let isValidRow = true; // Flag to track if row has valid data
 
-                        schemaData.columns.forEach(col => {
+                        schemaData.columns.columns.forEach(col => {
                             if (row.hasOwnProperty(col.name)) {
-                                if (col.type === 'Date' && row[col.name]) {
+                                if (col.type === 'date' && row[col.name]) {
                                     parsedRow[col.name] = new Date(row[col.name]);
                                 } else {
                                     if (col.name === 'status') {
@@ -157,87 +163,62 @@ const DynamicTablesUI = ({ pageName }) => {
     if (error) return <div>Error: {error.message}</div>;
 
     return (
-        <div>
+        <div className="container">
             <Toast ref={toast} /> {/* Add Toast component */}
-            <h1>Page Schema for {pageName}</h1>
-            <div className="toolbar">
-                <RowsPerPage
-                    rows={rows}
-                    setRows={setRows}
-                    filteredData={filteredData}
-                />
-                <ColumnToggle
-                    schema={schema}
-                    selectedColumns={selectedColumns}
-                    setSelectedColumns={setSelectedColumns}
-                />
-                <GlobalSearch
-                    globalFilter={globalFilter}
-                    setGlobalFilter={setGlobalFilter}
-                    filterData={filterData}
-                />
-                <ClearFiltersButton
-                    setGlobalFilter={setGlobalFilter}
-                    setFilteredData={setFilteredData}
-                    data={data}
-                    schema={schema}
-                    setSelectedRows={setSelectedRows}
-                    resetSorting={resetSorting}
-                    setDateRangeFilter={setDateRangeFilter}
-                />
+            <div className="header">
+                <div className="hamburger-icon">
+                    {/* Hamburger Icon */}
+                    <button className="hamburger-button">☰</button>
+                </div>
+                <div className="page-title">
+                    <h1 className="page-name">{pageName}</h1> {/* Centered page name */}
+                </div>
+                <div className="toolbar-right">
+                    <ColumnToggle
+                        schema={schema}
+                        selectedColumns={selectedColumns}
+                        setSelectedColumns={setSelectedColumns}
+                    />
+                    <GlobalSearch
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter}
+                        filterData={filterData}
+                    />
+                    <ClearFiltersButton
+                        setGlobalFilter={setGlobalFilter}
+                        setFilteredData={setFilteredData}
+                        data={data}
+                        schema={schema}
+                        setSelectedRows={setSelectedRows}
+                        resetSorting={resetSorting}
+                        setDateRangeFilter={setDateRangeFilter}
+                    />
+
+                </div>
             </div>
-            {/* Conditional rendering of the table headers or a no data message */}
-            {filteredData.length === 0 ? (
-                <table className="p-d-table">
-                    <thead>
-                        <tr>
-                            {selectedColumns.map((col, index) => (
-                                <th key={index} className="table-header">{col.name}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.length === 0 || filteredData.every(row => Object.values(row).every(value => !value)) ? (
-                            // If no data or all data is mismatched (empty or falsy), display only the headers
-                            <tr>
-                                <td colSpan={selectedColumns.length} className="no-data">
-                                    <span style={{ color: 'red' }}>No matching data found</span>
-                                </td>
-                            </tr>
-                        ) : (
-                            // If data is available and not mismatched, display the table rows
-                            filteredData.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    {selectedColumns.map((col, colIndex) => (
-                                        <td key={colIndex}>{row[col.name]}</td>
-                                    ))}
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            ) : (
-                <DataTableComponent
-                    filteredData={filteredData}
-                    setFilteredData={setFilteredData}
-                    rows={rows}
-                    globalFilter={globalFilter}
-                    selectedColumns={selectedColumns}
-                    handleEdit={handleEdit}
-                    toast={toast}
-                    schema={schema}
-                    selectedRows={selectedRows}
-                    setSelectedRows={setSelectedRows}
-                    sortField={sortField}
-                    setSortField={setSortField}
-                    sortOrder={sortOrder}
-                    setSortOrder={setSortOrder}
-                    setData={setData}
-                    dateRangeFilter={dateRangeFilter}
-                    setDateRangeFilter={setDateRangeFilter}
-                />
-            )}
-        </div>
+            <DataTableComponent
+                data={data}
+                filteredData={filteredData}
+                setFilteredData={setFilteredData}
+                rows={rows}
+                globalFilter={globalFilter}
+                selectedColumns={selectedColumns}
+                handleEdit={handleEdit}
+                toast={toast}
+                schema={schema}
+                selectedRows={selectedRows}
+                setSelectedRows={setSelectedRows}
+                sortField={sortField}
+                setSortField={setSortField}
+                sortOrder={sortOrder}
+                setSortOrder={setSortOrder}
+                setData={setData}
+                dateRangeFilter={dateRangeFilter}
+                setDateRangeFilter={setDateRangeFilter}
+                setRows={setRows}
+
+            />
+        </div >
     );
 };
 export default DynamicTablesUI;

@@ -11,37 +11,47 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-family: Arial, Helvetica, sans-serif;
 }
-.toolbar {
-  display: flex; /* Align children in a row */
-  align-items: center; /* Vertically align items */
-  justify-content: space-between; /* Space between left and right sections */
-  padding: 10px; /* Optional: Add some padding */
-  gap: 5px; /* Optional: Add spacing between items */
+/* Container for the whole content */
+.container {
+  width: 100%;
 }
-
-.toolbar > :nth-child(1),
-.toolbar > :nth-child(2) {
-  margin-right: auto; /* Push RowsPerPage and ColumnToggle to the left */
-}
-
-.toolbar > :nth-child(3),
-.toolbar > :nth-child(4) {
-  margin-left: 10px; /* Push GlobalSearch and ClearFiltersButton to the right */
-}
-.rows-per-page-container {
+.header {
   display: flex;
-  align-items: center; /* Ensures vertical alignment */
+  justify-content: space-between; /* Space out the elements */
+  align-items: center; /* Vertically align elements */
+  padding: 10px; /* Optional padding */
+  position: relative; /* Needed for absolute positioning of the hamburger */
+  width: 100%;
 }
 
-.rows-per-page-container label {
-  margin-right: 0; /* No margin between label and input */
+/* Hamburger Icon Styles */
+.hamburger-icon {
+  position: absolute; /* Position it at the top left corner */
+  left: 10px; /* Adjust the left position as needed */
+  top: 10px; /* Adjust the top position as needed */
 }
 
-.rows-per-page-container input {
-  margin-left: 0; /* No margin between input and label */
-  width: 4em; /* Optional: Adjust width of input for better fit */
+.hamburger-button {
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #000;
+  cursor: pointer;
 }
 
+/* Page Title Styles */
+.page-title {
+  flex-grow: 1; /* Makes sure it takes the available space */
+  text-align: center; /* Centers the page name */
+  margin-left: 45rem;
+}
+
+/* Toolbar Right Styles */
+.toolbar-right {
+  display: flex;
+  justify-content: flex-end; /* Align the items to the right */
+  gap: 10px; /* Space between items */
+}
 
 .p-multiselect {
   width: 100%;
@@ -53,6 +63,10 @@ body {
   font-weight: bold; /* Make the header text bold */
   text-align: center; /* Center align the header text */
   padding: 10px; /* Add padding to the header */
+  padding-left: 2rem;
+}
+.p-datatable .p-column-header-content {
+  display: block !important; /* You can use block or another display type */
 }
 .p-button{
   margin: 2px;
@@ -60,12 +74,6 @@ body {
 input[type="text" i]{
   height: 38px;
 }
-/* .p-button[aria-label="Clear"] {
-  display: none; /* or visibility: hidden;*/
-/* } */ 
-/* .p-button[aria-label="Apply"]{
-  display: none; /* or visibility: hidden;*/
-/* } */ 
 
 /* Basic Table Styling */
 .p-d-table {
@@ -95,3 +103,18 @@ input[type="text" i]{
 .p-d-table tr:hover {
   background-color: #f5f5f5;
 }
+/* Hide the filter and sort icons by default */
+.p-datatable .p-column-header-content .p-column-sortable .p-sortable-column, 
+.p-datatable .p-column-header-content .p-column-filter {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Show the icons when hovering over the header */
+.p-datatable .p-column-header-content:hover .p-column-sortable .p-sortable-column,
+.p-datatable .p-column-header-content:hover .p-column-filter {
+    visibility: visible;
+    opacity: 1;
+}
+

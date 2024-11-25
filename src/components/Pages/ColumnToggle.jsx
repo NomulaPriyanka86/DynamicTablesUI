@@ -3,21 +3,22 @@ import { MultiSelect } from 'primereact/multiselect';
 
 export const ColumnToggle = ({ schema, selectedColumns, setSelectedColumns }) => {
     const onColumnToggle = (e) => {
-        const sortedColumns = schema.columns.filter(col => e.value.some(selected => selected.name === col.name));
+        const selectedNames = e.value.map(selected => selected.name);
+        const sortedColumns = schema.filter(col => selectedNames.includes(col.name));
         setSelectedColumns(sortedColumns);
     };
-
+    if (!schema) return <div>Loading Columns...</div>;
     return (
         <MultiSelect
             value={selectedColumns}
-            options={schema ? schema.columns : []}
+            options={schema}
             optionLabel="name"
             onChange={onColumnToggle}
-            // placeholder="Toggle the Columns to Show/hide"
-            style={{ width: '15em' }}
+            placeholder="Toggle Columns"
+            style={{ width: '13em' }}
             display="chip"
             selectedItemTemplate={() => (
-                <span style={{ color: 'gray' }}>Columns to Show/Hide</span>
+                <span style={{ color: 'gray' }}>Hide/Show Columns</span>
             )} // Always show the placeholder
         />
     );

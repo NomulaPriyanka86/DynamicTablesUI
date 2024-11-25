@@ -8,6 +8,7 @@ import { Calendar } from 'primereact/calendar';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling
 import { validateField } from './Validations';
+import { RowsPerPage } from './RowsPerPage';
 // Function to format dates
 function formatDateToDDMMYYYY(date) {
     if (typeof date === 'string' && date.includes('-')) {
@@ -27,9 +28,11 @@ function formatDateToDDMMYYYY(date) {
 }
 
 export const DataTableComponent = ({
+    data,
     filteredData,
     setFilteredData,
     rows,
+    setRows,
     globalFilter,
     selectedColumns,
     handleEdit,
@@ -100,13 +103,13 @@ export const DataTableComponent = ({
     };
 
     const renderColumn = (col) => {
-        const matchMode = col.type === 'Date' ? 'dateIs' : 'contains';
+        const matchMode = col.type === 'date' ? 'dateIs' : 'contains';
 
         return (
             <Column
                 key={col.name}
                 field={col.name}
-                header={col.name}
+                header={col.displayName || col.name} // Use displayName if available, fallback to name
                 headerClassName="wide-column"
                 sortable={true}
                 filter={true}
@@ -133,7 +136,7 @@ export const DataTableComponent = ({
                             onMouseLeave={handleMouseLeave}
                         >
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
-                                col.type === 'Date' ? (
+                                col.type === 'date' ? (
                                     // Calendar component for selecting date
                                     <Calendar
                                         value={
@@ -166,7 +169,7 @@ export const DataTableComponent = ({
                                         onFocus={() => setInitialValue(value || '')}
                                         onBlur={(e) => {
                                             const newValue = e.target.value;
-                                            if (col.type !== 'Date') {
+                                            if (col.type !== 'date') {
                                                 // Non-date field validation
                                                 const validationMessage = validateField(newValue, col.name, schema);
                                                 if (validationMessage !== true) {
@@ -182,7 +185,7 @@ export const DataTableComponent = ({
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 const newValue = e.target.value;
-                                                if (col.type !== 'Date') {
+                                                if (col.type !== 'date') {
                                                     // Non-date field validation
                                                     const validationMessage = validateField(newValue, col.name, schema);
                                                     if (validationMessage !== true) {
@@ -200,7 +203,7 @@ export const DataTableComponent = ({
                                 )
                             ) : (
                                 <>
-                                    {col.type === 'Date' ? formatDateToDDMMYYYY(value) : value}
+                                    {col.type === 'date' ? formatDateToDDMMYYYY(value) : value}
                                     {isEditable &&
                                         (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ||
                                             editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
@@ -220,7 +223,7 @@ export const DataTableComponent = ({
                 }}
 
                 filterElement={(options) => {
-                    if (col.type === 'Date') {
+                    if (col.type === 'date') {
                         return (
                             <Calendar
                                 value={dateRangeFilter}
@@ -258,7 +261,8 @@ export const DataTableComponent = ({
             <ToastContainer />
 
             <DataTable
-                value={filteredData.length > 0 ? filteredData : []} // Conditional rendering for rows
+                data={data}
+                value={filteredData} // Conditional rendering for rows
                 paginator={true}
                 rows={rows}
                 showGridlines
@@ -274,15 +278,17 @@ export const DataTableComponent = ({
                     setSortField(e.sortField);
                     setSortOrder(e.sortOrder);
                 }}
+                paginatorLeft={<RowsPerPage rows={rows} setRows={setRows} filteredData={filteredData} />}
+                paginatorRight
             >
                 <Column
                     header={
-                        <div style={{ alignItems: 'center', width: '6rem' }}>
+                        <div style={{ alignItems: 'center', width: '7rem' }}>
                             <Checkbox
                                 checked={selectedRows.length === filteredData.length}
                                 onChange={handleSelectAll}  // "Select All" functionality
                             />
-                            <span>Select All</span>
+                            <span style={{ paddingLeft: "10px" }}>Select All</span>
                         </div>
                     }
                     body={(rowData) => (
