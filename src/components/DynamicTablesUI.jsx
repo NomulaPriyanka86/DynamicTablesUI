@@ -13,7 +13,9 @@ import { getKycData, getPageData, getUserSpins } from '../services/dataService';
 import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStorage.js'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-const DynamicTablesUI = ({ pageName }) => {
+import PageSchemas from './Pages/PageSchemas.jsx';
+import { useLocation, useParams } from 'react-router-dom';
+const DynamicTablesUI = ({ tenantName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +28,12 @@ const DynamicTablesUI = ({ pageName }) => {
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState(null);
     const [dateRangeFilter, setDateRangeFilter] = useState(null); // For range calendar filter
+    const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false); // Manage hamburger menu visibility
+    //const [tenantName, setTenantName] = useState('bluboy'); // Example, it could be dynamic
     const toast = useRef(null); // Create a toast reference
+    const { pageTitle } = useParams();  // Destructure pageTitle from URL params
+    const location = useLocation();  // Track location changes
+    console.log('Page Title:', pageTitle);  // Check if pageTitle is correctly received
 
     const handleEdit = (newValue, colName, rowId) => {
         console.log('Editing:', { newValue, colName, rowId });
@@ -75,51 +82,76 @@ const DynamicTablesUI = ({ pageName }) => {
             });
         }
     };
+    // Toggle function for hamburger menu
+    const toggleHamburgerMenu = () => {
+        setIsHamburgerMenuOpen((prevState) => !prevState);
+    };
+    // Close hamburger menu on page change
+    useEffect(() => {
+        setIsHamburgerMenuOpen(false); // Close the hamburger menu when page changes
+    }, [location]);
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);  // Start loading before fetching data
+
             try {
-                // Fetch schema and data
-                const schemaResponse = await getPageSchema(pageName);
-                const schemaData = schemaResponse.data;
-                const schemaColumns = schemaData.columns.columns; // Adjust for nested structure
-                setSchema(schemaColumns);
-                setSelectedColumns(schemaColumns);
+                // Fetch schema
+                const schemaResponse = await getPageSchema(pageTitle);
+                const { columns: schemaColumns } = schemaResponse.data || {}; // Ensure schemaData is not null or undefined
 
-                // Load table data from localStorage if available
-                loadFromLocalStorage('tableData');
+                // Check if schemaColumns is valid
+                if (!schemaColumns || !Array.isArray(schemaColumns.columns)) {
+                    throw new Error('Invalid schema data: columns are missing or malformed');
+                }
 
-                const kycResponse = await getPageData(pageName);
+                setSchema(schemaColumns.columns); // Set schema columns
+                setSelectedColumns(schemaColumns.columns); // Set default selected columns
+
+                // Load table data from localStorage (if available)
+                loadFromLocalStorage('tableData'); // Assuming this loads into local state or context
+
+                // Fetch KYC data
+                const kycResponse = await getPageData(pageTitle);
                 const kycData = kycResponse.data;
                 console.log(JSON.stringify(kycData));
 
                 if (Array.isArray(kycData.data)) {
-                    const parsedData = kycData.data.map(row => {
-                        const parsedRow = {};
-                        parsedRow.id = uuidv4(); // Unique ID for each row
+                    const parsedData = kycData.data
+                        .map(row => {
+                            const parsedRow = { id: uuidv4() }; // Assign a unique ID to each row
+                            let isValidRow = true; // Flag to track if row is valid
 
-                        let isValidRow = true; // Flag to track if row has valid data
-
-                        schemaData.columns.columns.forEach(col => {
-                            if (row.hasOwnProperty(col.name)) {
-                                if (col.type === 'date' && row[col.name]) {
-                                    parsedRow[col.name] = new Date(row[col.name]);
-                                } else {
-                                    if (col.name === 'status') {
-                                        parsedRow[col.name] = row[col.name] === 'approve' ? 'Approved' : row[col.name] === 'reject' ? 'Rejected' : row[col.name];
+                            // Process row data according to schema
+                            schemaColumns.columns.forEach(col => { // Ensure this is accessing columns correctly
+                                if (row.hasOwnProperty(col.name)) {
+                                    // Handle date columns
+                                    if (col.type === 'date' && row[col.name]) {
+                                        parsedRow[col.name] = new Date(row[col.name]);
                                     } else {
-                                        parsedRow[col.name] = row[col.name];
+                                        // Handle status column mapping
+                                        if (col.name === 'status') {
+                                            parsedRow[col.name] =
+                                                row[col.name] === 'approve' ? 'Approved' :
+                                                    row[col.name] === 'reject' ? 'Rejected' :
+                                                        row[col.name];
+                                        } else {
+                                            parsedRow[col.name] = row[col.name]; // Handle other fields
+                                        }
                                     }
+                                } else {
+                                    isValidRow = false; // Mark row as invalid if column data is missing
                                 }
-                            } else {
-                                isValidRow = false; // Mark row as invalid if a schema key is missing
-                            }
-                        });
+                            });
 
-                        return isValidRow ? parsedRow : null; // Only return row if it's valid
-                    }).filter(row => row !== null); // Remove any invalid rows
-                    // Save fetched data to localStorage
+                            return isValidRow ? parsedRow : null; // Only return valid rows
+                        })
+                        .filter(row => row !== null); // Remove invalid rows
+
+                    // Save the parsed data to localStorage
                     saveToLocalStorage('tableData', parsedData);
+
+                    // Set parsed data to state
                     setData(parsedData);
                     setFilteredData(parsedData); // Set initial filtered data
                 } else {
@@ -127,15 +159,16 @@ const DynamicTablesUI = ({ pageName }) => {
                     setError(new Error('Sample Data is not in the expected format'));
                 }
 
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching or parsing data:', error);
-                setError(error);
-                setLoading(false);
+                setError(error); // Handle error state
+            } finally {
+                setLoading(false); // End loading regardless of success or failure
             }
         };
+
         fetchData();
-    }, [pageName]);
+    }, [pageTitle, tenantName]);
 
     const filterData = (filterValue) => {
         const lowercasedFilter = filterValue.toLowerCase();
@@ -168,10 +201,10 @@ const DynamicTablesUI = ({ pageName }) => {
             <div className="header">
                 <div className="hamburger-icon">
                     {/* Hamburger Icon */}
-                    <button className="hamburger-button">☰</button>
+                    <button className="hamburger-button" onClick={toggleHamburgerMenu}>☰</button>
                 </div>
                 <div className="page-title">
-                    <h1 className="page-name">{pageName}</h1> {/* Centered page name */}
+                    <h1 className="page-name">{pageTitle}</h1> {/* Centered page name */}
                 </div>
                 <div className="toolbar-right">
                     <ColumnToggle
@@ -193,31 +226,41 @@ const DynamicTablesUI = ({ pageName }) => {
                         resetSorting={resetSorting}
                         setDateRangeFilter={setDateRangeFilter}
                     />
-
                 </div>
             </div>
-            <DataTableComponent
-                data={data}
-                filteredData={filteredData}
-                setFilteredData={setFilteredData}
-                rows={rows}
-                globalFilter={globalFilter}
-                selectedColumns={selectedColumns}
-                handleEdit={handleEdit}
-                toast={toast}
-                schema={schema}
-                selectedRows={selectedRows}
-                setSelectedRows={setSelectedRows}
-                sortField={sortField}
-                setSortField={setSortField}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-                setData={setData}
-                dateRangeFilter={dateRangeFilter}
-                setDateRangeFilter={setDateRangeFilter}
-                setRows={setRows}
+            <div className="layout">
+                {isHamburgerMenuOpen && (
+                    <div className="hamburger-menu">
+                        <PageSchemas tenantName={tenantName} /> {/* Display schemas here */}
+                    </div>
+                )}
+                <div className="content">
+                    <div className="data-table-wrapper">
+                        <DataTableComponent
+                            data={data}
+                            filteredData={filteredData}
+                            setFilteredData={setFilteredData}
+                            rows={rows}
+                            globalFilter={globalFilter}
+                            selectedColumns={selectedColumns}
+                            handleEdit={handleEdit}
+                            toast={toast}
+                            schema={schema}
+                            selectedRows={selectedRows}
+                            setSelectedRows={setSelectedRows}
+                            sortField={sortField}
+                            setSortField={setSortField}
+                            sortOrder={sortOrder}
+                            setSortOrder={setSortOrder}
+                            setData={setData}
+                            dateRangeFilter={dateRangeFilter}
+                            setDateRangeFilter={setDateRangeFilter}
+                            setRows={setRows}
 
-            />
+                        />
+                    </div>
+                </div>
+            </div>
         </div >
     );
 };

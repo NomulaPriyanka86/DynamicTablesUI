@@ -11,5 +11,5 @@ export const getKycData = () => {
   };
   
   export const getUserSpins =() => {
-    return api.get('/spin-data/info');
+    return api.get('/spin_amount_missing/info');
   }

@@ -15,7 +15,6 @@ export const ClearFiltersButton = ({ setGlobalFilter, setFilteredData, data, sch
             icon="pi pi-filter-slash"
             className="p-button-text p-button-rounded p-button-sm"
             onClick={clearFilters}
-            tooltip="Clear Filters"
         />
     );
 };

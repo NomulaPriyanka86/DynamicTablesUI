@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
 });
 
-const tenantName = 'bluboy';
+export const tenantName = 'bluboy';
 
 export const getPageSchema = (pageName) => {
   return api.get(`/page-schema/${tenantName}/${pageName}`, {
