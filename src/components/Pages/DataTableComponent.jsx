@@ -156,7 +156,10 @@ export const DataTableComponent = ({
                                                 const formattedDate = `${month}/${day}/${year}`;
 
                                                 handleEdit(formattedDate, col.name, rowData.id);  // Update with formatted date
+                                                // Refresh the page after the first edit
+                                                window.location.reload();
                                             }
+
                                             setEditingCell(null);  // Close the edit mode
                                         }}
                                         dateFormat="mm/dd/yy"
