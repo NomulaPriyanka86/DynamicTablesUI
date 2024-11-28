@@ -44,8 +44,20 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
             return;
         }
 
+        // Optimistic UI Update: Immediately update the status in the frontend
+        const updatedData = filteredData.map(dataRow =>
+            selectedRows.includes(dataRow.id)
+                ? { ...dataRow, status: formattedStatus }
+                : dataRow
+        );
+
+        // Update filteredData and Data state immediately to reflect the changes
+        setFilteredData(updatedData);
+        setData(updatedData);
+        saveToLocalStorage('tableData', updatedData);
+
+        // Now make the API requests
         try {
-            // Log payloads for debugging
             const apiResponses = await Promise.all(
                 apiRequests.map(async (updatedRow) => {
                     const response = await fetch(`http://localhost:8081/api/v1/page-data/${pageTitle}/info`, {
@@ -78,14 +90,14 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
                 const successfulUpdatesMap = new Map(successfulUpdates.map(res => [res.data.id, res.data]));
 
                 // Update filteredData with the successful responses
-                const updatedFilteredData = filteredData.map(dataRow =>
+                const finalUpdatedData = updatedData.map(dataRow =>
                     successfulUpdatesMap.has(dataRow.id) ? successfulUpdatesMap.get(dataRow.id) : dataRow
                 );
 
                 // Update the state and localStorage
-                setData(updatedFilteredData);
-                setFilteredData(updatedFilteredData);
-                saveToLocalStorage('tableData', updatedFilteredData);
+                setData(finalUpdatedData);
+                setFilteredData(finalUpdatedData);
+                saveToLocalStorage('tableData', finalUpdatedData);
                 setSelectedRows([]); // Clear selected rows
 
                 // Show toast based on the success or failure of the updates
