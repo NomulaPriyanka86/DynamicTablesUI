@@ -5,7 +5,7 @@ import 'primeicons/primeicons.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PageSchemas from './components/Pages/PageSchemas'
 import { tenantName } from './services/apiService';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';  // Theme CSS
+import 'primereact/resources/themes/saga-blue/theme.css';  // Choose a theme
 import 'primereact/resources/primereact.min.css';  // Core CSS
 import 'primeicons/primeicons.css';  // Icons CSS
 function App() {

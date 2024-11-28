@@ -131,6 +131,12 @@ body {
   width: 100%;
   margin: 5px;
 }
+.p-button{
+  margin: 2px;
+}
+input[type="text" i]{
+  height: 38px;
+}
 
 .wide-column {
   background-color: #f4f4f4; /* Light background color for the header */
