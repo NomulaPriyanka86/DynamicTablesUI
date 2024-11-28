@@ -1,16 +1,21 @@
 import './App.css'
-import DataDynamic from './components/DataDynamic'
-import PageSchema from './components/PageSchema'
+import DynamicTablesUI from './components/DynamicTablesUI'
 import React from 'react'
-
+import 'primeicons/primeicons.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import PageSchemas from './components/Pages/PageSchemas'
+import { tenantName } from './services/apiService';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';  // Theme CSS
+import 'primereact/resources/primereact.min.css';  // Core CSS
+import 'primeicons/primeicons.css';  // Icons CSS
 function App() {
   return (
-    <>
-      <PageSchema pageName="page1" />
-      <br></br>
-      <PageSchema pageName="page2" />
-    </>
-    
+    <Router> {/* Wrap your routes in a Router */}
+      <Routes>
+        <Route path="/" element={<PageSchemas tenantName={tenantName} />} />
+        <Route path="/dynamic-table/:pageTitle" element={<DynamicTablesUI tenantName={tenantName} />} />
+      </Routes>
+    </Router>
   )
 }
 export default App

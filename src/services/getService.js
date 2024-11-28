@@ -2,7 +2,7 @@ export const fetchData = async (tenantName, pageName) => {
     // const tenantName = 'bluboy'; // Fixed tenant name
 
     try {
-        const response = await fetch(`http://localhost:8081/api/v1/page-schema/${tenantName}/${pageName}`, {
+        const response = await fetch(`http://localhost:8080/api/v1/page-schema/${tenantName}/${pageName}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
