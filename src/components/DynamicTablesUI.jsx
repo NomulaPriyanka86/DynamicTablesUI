@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPageSchema } from '../services/apiService';
-import sampleData from '../data/sampleMockData3.json';
 import { GlobalSearch } from './Pages/GlobalSearch';
-import { RowsPerPage } from './Pages/RowsPerPage';
 import { ClearFiltersButton } from './Pages/ClearFiltersButton';
 import { ColumnToggle } from './Pages/ColumnToggle';
 import { DataTableComponent } from './Pages/DataTableComponent';
 import { Toast } from 'primereact/toast'; // Import Toast component
 import { v4 as uuidv4 } from 'uuid'; // Import UUID to generate unique IDs for rows
 import { validateField } from './Pages/Validations';
-import { getKycData, getPageData, getUserSpins } from '../services/dataService';
+import { getPageData } from '../services/dataService';
 import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStorage.js'
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PageSchemas from './Pages/PageSchemas.jsx';
 import { useLocation, useParams } from 'react-router-dom';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { MultiSelect } from 'primereact/multiselect';
-
 export const ColumnToggle = ({ schema, selectedColumns, setSelectedColumns }) => {
     const onColumnToggle = (e) => {
         const selectedNames = e.value.map(selected => selected.name);
