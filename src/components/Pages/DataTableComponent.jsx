@@ -43,7 +43,8 @@ export const DataTableComponent = ({
     setSortField,
     sortOrder,
     setSortOrder,
-    setData, dateRangeFilter, setDateRangeFilter
+    setData, dateRangeFilter, setDateRangeFilter,
+    pageTitle
 }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
@@ -257,6 +258,7 @@ export const DataTableComponent = ({
                 filteredData={filteredData}
                 setFilteredData={setFilteredData}
                 setData={setData}
+                pageTitle={pageTitle}
             />
             <ToastContainer />
 

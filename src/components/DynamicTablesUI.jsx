@@ -32,17 +32,20 @@ const DynamicTablesUI = ({ tenantName }) => {
     const location = useLocation();  // Track location changes
     console.log('Page Title:', pageTitle);  // Check if pageTitle is correctly received
 
-    const handleEdit = (newValue, colName, rowId) => {
+    const handleEdit = async (newValue, colName, rowId) => {
         console.log('Editing:', { newValue, colName, rowId });
 
-        // Find the row to edit
-        const row = filteredData.find(row => row.id === rowId);
-        if (!row) {
+        // Find the index of the row being edited
+        const rowIndex = filteredData.findIndex(row => row.id === rowId);
+        if (rowIndex === -1) {
             console.error(`Row with id ${rowId} not found.`);
             return;
         }
 
-        const oldValue = row[colName];
+        const oldRow = filteredData[rowIndex];
+        const oldValue = oldRow[colName];
+
+        // Check if value actually changed
         if (newValue !== oldValue) {
             const validationResult = validateField(newValue, colName, schema);
             if (validationResult !== true) {
@@ -55,28 +58,69 @@ const DynamicTablesUI = ({ tenantName }) => {
                 return; // Exit if validation fails
             }
 
-            // Create a new array to update state immutably
-            const updatedData = filteredData.map(row => {
-                if (row.id === rowId) {
-                    return { ...row, [colName]: newValue }; // Update only the matching row
+            // Handle status column update
+            if (colName === 'status') {
+                if (newValue === 'approve') {
+                    newValue = 'Approved';
+                } else if (newValue === 'reject') {
+                    newValue = 'Rejected';
+                } else {
+                    newValue = 'Pending';
                 }
-                return row; // Return unchanged rows
-            });
+            }
 
-            // Save the updated data to localStorage
-            saveToLocalStorage('tableData', updatedData);
+            // Create the updated row
+            const updatedRow = { ...oldRow, [colName]: newValue };
 
-            // Update state immutably
-            setFilteredData(updatedData); // Update filtered data
-            setData(updatedData); // Update the main data
+            try {
+                const apiUrl = `http://localhost:8081/api/v1/page-data/${pageTitle}/info`;
 
-            // Display a success toast when data is updated
-            toast.current.show({
-                severity: 'success',
-                summary: 'Data Updated...',
-                detail: `${colName} updated to ${newValue}`,
-                life: 3000,
-            });
+                // Call the PUT API to update the row
+                const response = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedRow),
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok && responseData.success) {
+                    // Update the specific row while preserving order
+                    const updatedData = filteredData.map((row, index) =>
+                        index === rowIndex ? updatedRow : row
+                    );
+
+                    // Save to localStorage and update state
+                    saveToLocalStorage('tableData', updatedData);
+                    setFilteredData(updatedData);
+                    setData(updatedData);
+
+                    toast.current.show({
+                        severity: 'success',
+                        summary: 'Data Updated',
+                        detail: `${colName} updated to ${newValue}. ${responseData.message}`,
+                        life: 3000,
+                    });
+                } else {
+                    console.error('API Error:', responseData.message);
+                    toast.current.show({
+                        severity: 'error',
+                        summary: 'Update Failed',
+                        detail: responseData.message,
+                        life: 3000,
+                    });
+                }
+            } catch (error) {
+                console.error('Network or Server Error:', error);
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Update Failed',
+                    detail: 'An error occurred while updating the data.',
+                    life: 3000,
+                });
+            }
         }
     };
     // Toggle function for hamburger menu
@@ -253,7 +297,7 @@ const DynamicTablesUI = ({ tenantName }) => {
                             dateRangeFilter={dateRangeFilter}
                             setDateRangeFilter={setDateRangeFilter}
                             setRows={setRows}
-
+                            pageTitle={pageTitle}
                         />
                     </div>
                 </div>
