@@ -165,6 +165,22 @@ export const DataTableComponent = ({
                                         dateFormat="mm/dd/yy"
                                         autoFocus
                                     />
+                                ) : col.possibleValues ? (
+                                    // Dropdown for columns with possibleValues
+                                    <select
+                                        value={value || ''}
+                                        onChange={(e) => {
+                                            handleEdit(e.target.value, col.name, rowData.id);
+                                        }}
+                                        autoFocus
+                                    >
+                                        <option value="">Select {col.displayName}</option>
+                                        {col.possibleValues.map((val) => (
+                                            <option key={val} value={val}>
+                                                {val}
+                                            </option>
+                                        ))}
+                                    </select>
                                 ) : (
                                     <input
                                         type="text"
@@ -223,6 +239,7 @@ export const DataTableComponent = ({
                         </div>
                     );
                 }}
+
 
                 filterElement={(options) => {
                     if (col.type === 'date') {
