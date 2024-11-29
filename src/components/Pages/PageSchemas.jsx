@@ -51,7 +51,7 @@ const PageSchemas = ({ tenantName }) => {
 
     return (
         <div className="page-schemas-container">
-            {/* <h2 className="page-schemas-header">Available Pages Schemas for {tenantName}</h2> */}
+            <h2 className="page-schemas-header">Available Pages Schemas for {tenantName}</h2>
             <div className="card flex justify-content-center">
                 {/* PrimeReact Tree component */}
                 <Tree

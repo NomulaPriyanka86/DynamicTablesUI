@@ -9,22 +9,25 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling
 import { validateField } from './Validations';
 import { RowsPerPage } from './RowsPerPage';
-// Function to format dates
-function formatDateToDDMMYYYY(date) {
-    if (typeof date === 'string' && date.includes('-')) {
-        // Assume the input is in DD-MM-YYYY format already
-        return date;
+// Function to format dates as mm/dd/yy
+function formatDateToMMDDYY(date) {
+    if (typeof date === 'string') {
+        // If date is already a string, assume it’s in 'mm/dd/yy' format
+        if (date.includes('/')) {
+            return date;  // Return as is if already in correct format
+        }
     }
 
-    // If it's a Date object, format it
-    if (date instanceof Date && !isNaN(date)) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+    // If the value is a Date object or timestamp, convert it to 'mm/dd/yy' format
+    if (date instanceof Date || !isNaN(new Date(date))) {
+        const dateObject = new Date(date);
+        const month = String(dateObject.getMonth() + 1).padStart(2, '0');  // Get month (1-based)
+        const day = String(dateObject.getDate()).padStart(2, '0');  // Get day and ensure two digits
+        const year = dateObject.getFullYear();  // Get last two digits of year
+        return `${month}/${day}/${year}`;  // Format as 'mm/dd/yy'
     }
 
-    return '';
+    return '';  // Return an empty string for invalid date values
 }
 
 export const DataTableComponent = ({
@@ -43,7 +46,8 @@ export const DataTableComponent = ({
     setSortField,
     sortOrder,
     setSortOrder,
-    setData, dateRangeFilter, setDateRangeFilter
+    setData, dateRangeFilter, setDateRangeFilter,
+    pageTitle
 }) => {
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
@@ -79,9 +83,9 @@ export const DataTableComponent = ({
             const filtered = filteredData.filter(row => {
                 let rowDate = row[columnName];
 
-                // If rowDate is a string and matches the expected 'DD-MM-YYYY' format, split it
+                // If rowDate is a string and matches the expected 'MM/DD/YYYY' format, split it
                 if (typeof rowDate === 'string' && rowDate.includes('-')) {
-                    rowDate = new Date(rowDate.split('-').reverse().join('-')); // Convert 'DD-MM-YYYY' to a Date object
+                    rowDate = new Date(rowDate.split('-').reverse().join('-')); // Convert 'MM/DD/YYYY' to a Date object
                 } else if (rowDate instanceof Date && !isNaN(rowDate)) {
                     // If it's already a Date object, we can directly use it
                     rowDate = new Date(rowDate);
@@ -101,7 +105,7 @@ export const DataTableComponent = ({
             setDateRangeFilter(null); // Clear the range input (this will reset the calendar input)
         }
     };
-
+    // In your renderColumn method:
     const renderColumn = (col) => {
         const matchMode = col.type === 'date' ? 'dateIs' : 'contains';
 
@@ -137,28 +141,28 @@ export const DataTableComponent = ({
                         >
                             {isEditable && editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name ? (
                                 col.type === 'date' ? (
-                                    // Calendar component for selecting date
                                     <Calendar
-                                        value={
-                                            value && typeof value === 'string'
-                                                ? new Date(value.split('-').reverse().join('-')) // Convert string to Date object
-                                                : value instanceof Date
-                                                    ? value
-                                                    : null
+                                        value={value && typeof value === 'string'
+                                            ? new Date(value.split('-').reverse().join('-'))  // Convert 'MM/DD/YYYY' to Date (month and date will be correctly parsed)
+                                            : value instanceof Date
+                                                ? value
+                                                : null
                                         }
                                         onChange={(e) => {
                                             if (e.value) {
-                                                // Format date as DD-MM-YYYY after selecting from calendar
                                                 const day = String(e.value.getDate()).padStart(2, '0');
                                                 const month = String(e.value.getMonth() + 1).padStart(2, '0');
                                                 const year = e.value.getFullYear();
-                                                const formattedDate = `${day}-${month}-${year}`;
+                                                const formattedDate = `${month}/${day}/${year}`;
 
-                                                handleEdit(formattedDate, col.name, rowData.id); // Update with formatted date
+                                                handleEdit(formattedDate, col.name, rowData.id);  // Update with formatted date
+                                                // Refresh the page after the first edit
+                                                window.location.reload();
                                             }
-                                            setEditingCell(null); // Close the edit mode
+
+                                            setEditingCell(null);  // Close the edit mode
                                         }}
-                                        dateFormat="dd-mm-yy"
+                                        dateFormat="mm/dd/yy"
                                         autoFocus
                                     />
                                 ) : (
@@ -170,40 +174,38 @@ export const DataTableComponent = ({
                                         onBlur={(e) => {
                                             const newValue = e.target.value;
                                             if (col.type !== 'date') {
-                                                // Non-date field validation
                                                 const validationMessage = validateField(newValue, col.name, schema);
                                                 if (validationMessage !== true) {
                                                     toast.error(validationMessage, {
                                                         position: "top-right",
                                                     });
                                                 } else {
-                                                    handleEdit(newValue, col.name, rowData.id); // Update with non-date value
+                                                    handleEdit(newValue, col.name, rowData.id);
                                                 }
                                             }
-                                            setEditingCell(null); // Close the edit mode
+                                            setEditingCell(null);
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 const newValue = e.target.value;
                                                 if (col.type !== 'date') {
-                                                    // Non-date field validation
                                                     const validationMessage = validateField(newValue, col.name, schema);
                                                     if (validationMessage !== true) {
                                                         toast.error(validationMessage, {
                                                             position: "top-right",
                                                         });
                                                     } else {
-                                                        handleEdit(newValue, col.name, rowData.id); // Update with non-date value
+                                                        handleEdit(newValue, col.name, rowData.id);
                                                     }
                                                 }
-                                                setEditingCell(null); // Close the edit mode
+                                                setEditingCell(null);
                                             }
                                         }}
                                     />
                                 )
                             ) : (
                                 <>
-                                    {col.type === 'date' ? formatDateToDDMMYYYY(value) : value}
+                                    {col.type === 'date' ? formatDateToMMDDYY(value) : value} {/* Use the function to format dates */}
                                     {isEditable &&
                                         (hoveredCell?.rowIndex === rowIndex && hoveredCell?.colName === col.name ||
                                             editingCell?.rowIndex === rowIndex && editingCell?.colName === col.name) && (
@@ -230,7 +232,7 @@ export const DataTableComponent = ({
                                 onChange={(e) => handleRangeFilterChange(e.value, col.name)}
                                 selectionMode="range"
                                 placeholder="Select date range"
-                                dateFormat="dd-mm-yy"
+                                dateFormat="mm/dd/yy"  // Ensure date format is mm/dd/yy
                                 showIcon
                             />
                         );
@@ -257,6 +259,7 @@ export const DataTableComponent = ({
                 filteredData={filteredData}
                 setFilteredData={setFilteredData}
                 setData={setData}
+                pageTitle={pageTitle}
             />
             <ToastContainer />
 
