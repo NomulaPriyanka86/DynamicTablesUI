@@ -57,15 +57,39 @@ const DynamicTablesUI = ({ tenantName }) => {
                 });
                 return; // Exit if validation fails
             }
-
             // Handle status column update
             if (colName === 'status') {
-                if (newValue === 'approve') {
+                // Check if the old value is 'Rejected' and prevent updates to 'Approved' or 'Pending'
+                if (oldValue === 'Rejected') {
+                    if (newValue === 'Approved') {
+                        // Prevent the update to 'Approved' if the current value is 'Rejected'
+                        toast.current.show({
+                            severity: 'error',
+                            summary: 'Invalid Status Change',
+                            detail: 'Rejected items cannot be approved.',
+                            life: 3000,
+                        });
+                        return; // Exit if the change is not allowed
+                    }
+                    if (newValue === 'Pending') {
+                        // Prevent the update to 'Pending' if the current value is 'Rejected'
+                        toast.current.show({
+                            severity: 'error',
+                            summary: 'Invalid Status Change',
+                            detail: 'Rejected items cannot be set to Pending.',
+                            life: 3000,
+                        });
+                        return; // Exit if the change is not allowed
+                    }
+                }
+
+                // Update status values properly
+                if (newValue === 'Approved') {
                     newValue = 'Approved';
-                } else if (newValue === 'reject') {
+                } else if (newValue === 'Rejected') {
                     newValue = 'Rejected';
                 } else {
-                    newValue = 'Pending';
+                    newValue = 'Pending'; // Default to Pending
                 }
             }
 
@@ -87,7 +111,7 @@ const DynamicTablesUI = ({ tenantName }) => {
                 const responseData = await response.json();
 
                 if (response.ok && responseData.success) {
-                    // Update the specific row while preserving order
+                    // Optimistically update the specific row while preserving order
                     const updatedData = filteredData.map((row, index) =>
                         index === rowIndex ? updatedRow : row
                     );
@@ -123,6 +147,7 @@ const DynamicTablesUI = ({ tenantName }) => {
             }
         }
     };
+
     // Toggle function for hamburger menu
     const toggleHamburgerMenu = () => {
         setIsHamburgerMenuOpen((prevState) => !prevState);
