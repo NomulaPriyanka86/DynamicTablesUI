@@ -1,0 +1,168 @@
+/* header.module.css */
+.header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+}
+
+/* footer.module.css */
+.footer {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+}
+
+/* form.module.css */
+ .customForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 300px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+ .formDiv {
+    display: flex;
+    flex-direction: column;
+}
+
+.formLabel {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.customInput,
+.customSelect {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 18rem;
+}
+
+.customForm .button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.customForm .button:hover {
+    background-color: #0056b3;
+}
+
+ .customForm .buttonIcon {
+    margin-right: 10px;
+}
+
+ .registerLogin {
+    text-align: center;
+}
+
+/* socialButtons.module.css */
+.socialButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    text-align: center;
+}
+
+ .socialButtonIcon {
+    margin-right: 10px;
+}
+
+.socialLoginIcons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.socialIcon {
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.socialIcon:hover {
+    transform: scale(1.2);
+    color: #007bff;
+}
+
+.google {
+    color: #db4437;
+    border-color: #db4437;
+}
+
+.facebook {
+    color: #3b5998;
+    border-color: #3b5998;
+}
+
+.twitter {
+    color: #1da1f2;
+    border-color: #1da1f2;
+}
+
+.github {
+    color: #333;
+    border-color: #333;
+}
+
+.email {
+    color: #0073e6;
+    border-color: #0073e6;
+}
+
+.email:hover {
+    background-color: #0073e6;
+    color: white;
+}
+/* registerToggle.module.css */
+.registerToggle {
+    display: block; /* Ensures button behaves as a block element for centering */
+    margin: 20px auto; /* Centers horizontally */
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.registerToggle:hover {
+    background-color: #0056b3;
+}
+
+.container {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    height: 100vh; /* Makes the container take the full viewport height */
+    flex-direction: column; /* Stacks the heading and button vertically */
+}

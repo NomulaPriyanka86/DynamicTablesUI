@@ -282,7 +282,7 @@ export const DataTableComponent = ({
 
             <DataTable
                 data={data}
-                value={filteredData} // Conditional rendering for rows
+                value={filteredData.length > 0 ? filteredData : []} // Conditional rendering for rows
                 paginator={true}
                 rows={rows}
                 showGridlines
@@ -301,24 +301,27 @@ export const DataTableComponent = ({
                 paginatorLeft={<RowsPerPage rows={rows} setRows={setRows} filteredData={filteredData} />}
                 paginatorRight
             >
-                <Column
-                    header={
-                        <div style={{ alignItems: 'center', width: '7rem' }}>
+                {/* Conditionally render the "Select All" column */}
+                {selectedColumns.some(col => col.possibleValues) && (
+                    <Column
+                        header={
+                            <div style={{ alignItems: 'center', width: '7rem' }}>
+                                <Checkbox
+                                    checked={selectedRows.length === filteredData.length}
+                                    onChange={handleSelectAll}  // "Select All" functionality
+                                />
+                                <span style={{ paddingLeft: "10px" }}>Select All</span>
+                            </div>
+                        }
+                        body={(rowData) => (
                             <Checkbox
-                                checked={selectedRows.length === filteredData.length}
-                                onChange={handleSelectAll}  // "Select All" functionality
+                                checked={selectedRows.includes(rowData.id)}  // Checkbox state is controlled by `selectedRows`
+                                onChange={() => handleRowSelect(rowData)}  // Only update selection when checkbox is clicked
                             />
-                            <span style={{ paddingLeft: "10px" }}>Select All</span>
-                        </div>
-                    }
-                    body={(rowData) => (
-                        <Checkbox
-                            checked={selectedRows.includes(rowData.id)}  // Checkbox state is controlled by `selectedRows`
-                            onChange={() => handleRowSelect(rowData)}  // Only update selection when checkbox is clicked
-                        />
-                    )}
-                    style={{ width: '3rem', textAlign: 'center' }}
-                />
+                        )}
+                        style={{ width: '3rem', textAlign: 'center' }}
+                    />
+                )}
                 {selectedColumns && selectedColumns.map(col => renderColumn(col))}
             </DataTable>
         </div>
