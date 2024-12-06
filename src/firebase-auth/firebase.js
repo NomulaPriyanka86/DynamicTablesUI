@@ -1,14 +1,5 @@
-// src/firebase.js
-
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  GithubAuthProvider,
-  TwitterAuthProvider,
-} from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth"; // Add necessary Firebase auth functions
 
 const firebaseConfig = {
   apiKey: "AIzaSyAAcSZzQGjzQ8O-5D7EX0iKRvK7cJrIv-o",
@@ -17,23 +8,10 @@ const firebaseConfig = {
   storageBucket: "fir-login-38d08.firebasestorage.app",
   messagingSenderId: "187749339275",
   appId: "1:187749339275:web:5c0d87f9ad283c5b2a448e",
-  measurementId: "G-MDZ09HNXHW"
+  measurementId: "G-MDZ09HNXHW",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 
-const googleProvider = new GoogleAuthProvider();
-const facebookProvider = new FacebookAuthProvider();
-const githubProvider = new GithubAuthProvider();
-const twitterProvider = new TwitterAuthProvider();
-
-export {
-  auth,
-  db,
-  googleProvider,
-  facebookProvider,
-  githubProvider,
-  twitterProvider,
-};
+export { auth, RecaptchaVerifier, signInWithPhoneNumber };
