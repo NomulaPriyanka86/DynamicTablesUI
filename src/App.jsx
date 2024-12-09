@@ -12,8 +12,9 @@ function App() {
   return (
     <Router> {/* Wrap your routes in a Router */}
       <Routes>
-        <Route path="/" element={<PageSchemas tenantName={tenantName} />} />
         <Route path="/dynamic-table/:pageTitle" element={<DynamicTablesUI tenantName={tenantName} />} />
+        <Route path="/" element={<PageSchemas tenantName={tenantName} />} />
+        {/* <Route path="/dynamic-table" element={<DynamicTablesUI tenantName={tenantName} />} /> */}
       </Routes>
     </Router>
   )

@@ -12,6 +12,7 @@ import { saveToLocalStorage, loadFromLocalStorage } from '../services/localStora
 import 'react-toastify/dist/ReactToastify.css';
 import PageSchemas from './Pages/PageSchemas.jsx';
 import { useLocation, useParams } from 'react-router-dom';
+import './dynamicTableUI.css';
 const DynamicTablesUI = ({ tenantName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);

@@ -15,21 +15,13 @@ const PageSchemas = ({ tenantName }) => {
                 console.log('The response data for the tenant is:', response);
 
                 if (response.data && Array.isArray(response.data.pageData)) {
-                    // Construct tree nodes with schemas as children of 'Available Pages Schemas'
-                    const treeNodes = [
-                        {
-                            // label: `${tenantName} Pages `, // Root label
-                            label: `Pages`,
-                            key: 'available-pages-schemas',
-                            children: response.data.pageData.map(page => ({
-                                label: page.pageTitle,  // Schema as child
-                                key: page.pageTitle,
-                                data: page.pageTitle,  // Optional additional data
-                                // You can link the page to its dynamic page URL
-                                url: `/dynamic-table/${page.pageTitle}`
-                            }))
-                        }
-                    ];
+                    // Map all page schemas as top-level tree nodes
+                    const treeNodes = response.data.pageData.map((page) => ({
+                        label: page.pageTitle, // Schema title as the node label
+                        key: page.pageTitle,
+                        data: page.pageTitle, // Additional data (optional)
+                        url: `/dynamic-table/${page.pageTitle}`, // Dynamic URL for the schema
+                    }));
                     setSchemas(treeNodes);
                 } else {
                     console.error('pageData not found or is not an array');
