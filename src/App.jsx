@@ -2,7 +2,7 @@ import './App.css'
 import DynamicTablesUI from './components/DynamicTablesUI'
 import React from 'react'
 import 'primeicons/primeicons.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import PageSchemas from './components/Pages/PageSchemas'
 import { tenantName } from './services/apiService';
 import 'primereact/resources/themes/saga-blue/theme.css';  // Choose a theme

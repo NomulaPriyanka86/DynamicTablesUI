@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllPageNames } from '../../services/apiService';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Tree } from 'primereact/tree';
 
 const PageSchemas = ({ tenantName }) => {
