@@ -9,26 +9,30 @@ import 'primereact/resources/themes/saga-blue/theme.css';  // Choose a theme
 import 'primereact/resources/primereact.min.css';  // Core CSS
 import 'primeicons/primeicons.css';  // Icons CSS
 import { AuthProvider, RequireAuth } from './components/AuthProvider'
-import {Login} from './components/Login'
+import { Login } from './components/Login'
+import { VerifyOTP } from './components/VerifyOTP';
+
 
 function App() {
   return (
     <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login/>}/>
-          <Route path="/dynamic-table/:pageTitle" element={
-            <RequireAuth>
-              <DynamicTablesUI tenantName={tenantName} />
-            </RequireAuth>
-          } />
-          <Route path="/" element={
-            <RequireAuth>
-              <PageSchemas tenantName={tenantName} />
-            </RequireAuth>
-            } />
-          {/* <Route path="/dynamic-table" element={<DynamicTablesUI tenantName={tenantName} />} /> */}
-        </Routes>
-      </AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/verifyOtp" element={<VerifyOTP />} /> {/* Add VerifyOTP route */}
+        {/* <Route path="/verifyOtp" element={<RequireAuth><VerifyOTP /></RequireAuth>} /> */}
+        <Route path="/dynamic-table/:pageTitle" element={
+          <RequireAuth>
+            <DynamicTablesUI tenantName={tenantName} />
+          </RequireAuth>
+        } />
+        <Route path="/" element={
+          <RequireAuth>
+            <PageSchemas tenantName={tenantName} />
+          </RequireAuth>
+        } />
+        {/* <Route path="/dynamic-table" element={<DynamicTablesUI tenantName={tenantName} />} /> */}
+      </Routes>
+    </AuthProvider>
   )
 }
 export default App
