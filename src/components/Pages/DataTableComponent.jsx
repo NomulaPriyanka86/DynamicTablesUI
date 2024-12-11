@@ -9,6 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling
 import { validateField } from './Validations';
 import { RowsPerPage } from './RowsPerPage';
+import { Dropdown } from 'primereact/dropdown';
 // Function to format dates as mm/dd/yy
 function formatDateToMMDDYY(date) {
     if (typeof date === 'string') {
@@ -132,6 +133,16 @@ export const DataTableComponent = ({
     // In your renderColumn method:
     const renderColumn = (col) => {
         const matchMode = col.type === 'date' ? 'dateIs' : 'contains';
+        // Dropdown options
+        const dropdownFilterTemplate = (options) => (
+            <Dropdown
+                value={options.value}
+                options={col.possibleValues.map((value) => ({ label: value, value }))}
+                onChange={(e) => options.filterCallback(e.value)}
+                placeholder={`Filter ${col.name}`}
+                className="p-column-filter"
+            />
+        );
 
         return (
             <Column
@@ -270,17 +281,30 @@ export const DataTableComponent = ({
 
                 filterElement={(options) => {
                     if (col.type === 'date') {
+                        // Render Calendar for date range filter
                         return (
                             <Calendar
                                 value={dateRangeFilter}
                                 onChange={(e) => handleRangeFilterChange(e.value, col.name)}
                                 selectionMode="range"
                                 placeholder="Select date range"
-                                dateFormat="mm/dd/yy"  // Ensure date format is mm/dd/yy
+                                dateFormat="mm/dd/yy" // Ensure date format is mm/dd/yy
                                 showIcon
                             />
                         );
+                    } else if (col.possibleValues && col.possibleValues.length > 0) {
+                        // Render Dropdown for columns with possibleValues
+                        return (
+                            <Dropdown
+                                value={options.value}
+                                options={col.possibleValues.map((value) => ({ label: value, value }))}
+                                onChange={(e) => options.filterCallback(e.value)}
+                                placeholder={`Select ${col.name}`}
+                                className="p-column-filter"
+                            />
+                        );
                     } else {
+                        // Default text input for other columns
                         return (
                             <input
                                 type="text"
@@ -291,6 +315,7 @@ export const DataTableComponent = ({
                         );
                     }
                 }}
+
             />
         );
     };
