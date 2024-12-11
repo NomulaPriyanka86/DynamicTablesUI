@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { FaPencilAlt } from 'react-icons/fa';
@@ -52,6 +52,30 @@ export const DataTableComponent = ({
     const [editingCell, setEditingCell] = useState(null);
     const [hoveredCell, setHoveredCell] = useState(null);
     const [initialValue, setInitialValue] = useState(null);
+    const selectRef = useRef(null); // Ref for the select dropdown
+    const inputRef = useRef(null);  // Ref for the input field
+
+
+    // Click event listener to detect clicks outside the cell
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                selectRef.current && !selectRef.current.contains(event.target) &&
+                inputRef.current && !inputRef.current.contains(event.target)
+            ) {
+                setEditingCell(null); // Close editing mode when clicking outside
+            }
+        };
+
+        // Add event listener for clicking outside
+        document.addEventListener('click', handleClickOutside);
+
+        // Cleanup the event listener when component unmounts or when editingCell is reset
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
     // Handle row selection
     const handleRowSelect = (rowData) => {
         const newSelectedRows = selectedRows.includes(rowData.id)
@@ -168,11 +192,14 @@ export const DataTableComponent = ({
                                 ) : col.possibleValues ? (
                                     // Dropdown for columns with possibleValues
                                     <select
+                                        ref={selectRef}
                                         value={value || ''}
                                         onChange={(e) => {
                                             handleEdit(e.target.value, col.name, rowData.id);
+                                            setEditingCell(null);  // Close the edit mode after selection
                                         }}
                                         autoFocus
+                                        onBlur={() => setEditingCell(null)}  // Remove editing mode when clicking away
                                     >
                                         <option value="">Select {col.displayName}</option>
                                         {col.possibleValues.map((val) => (
@@ -291,15 +318,15 @@ export const DataTableComponent = ({
                 selection={selectedRows}  // Controlled by `selectedRows`
                 onSelectionChange={(e) => setSelectedRows(e.value)}  // Updates the selected rows when checkboxes are clicked
                 dataKey="id"
-                removableSort
+                // removableSort
                 sortField={sortField}
                 sortOrder={sortOrder}
                 onSort={(e) => {
                     setSortField(e.sortField);
                     setSortOrder(e.sortOrder);
                 }}
-                paginatorLeft={<RowsPerPage rows={rows} setRows={setRows} filteredData={filteredData} />}
-                paginatorRight
+            // paginatorLeft={<RowsPerPage rows={rows} setRows={setRows} filteredData={filteredData} />}
+            // paginatorRight
             >
                 {/* Conditionally render the "Select All" column */}
                 {selectedColumns.some(col => col.possibleValues) && (

@@ -13,6 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import PageSchemas from './Pages/PageSchemas.jsx';
 import { useLocation, useParams } from 'react-router';
 import './dynamicTableUI.css';
+import { RowsPerPage } from './Pages/RowsPerPage.jsx';
 const DynamicTablesUI = ({ tenantName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -269,11 +270,10 @@ const DynamicTablesUI = ({ tenantName }) => {
                 <div className="hamburger-icon">
                     {/* Hamburger Icon */}
                     <button className="hamburger-button" onClick={toggleHamburgerMenu}>☰</button>
-                </div>
-                <div className="page-title">
                     <h1 className="page-name">{pageTitle}</h1> {/* Centered page name */}
                 </div>
                 <div className="toolbar-right">
+                    <RowsPerPage rows={rows} setRows={setRows} filteredData={filteredData} />
                     <ColumnToggle
                         schema={schema}
                         selectedColumns={selectedColumns}
