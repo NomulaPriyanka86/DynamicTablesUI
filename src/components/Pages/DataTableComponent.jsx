@@ -292,8 +292,8 @@ export const DataTableComponent = ({
                                 showIcon
                             />
                         );
-                    } else if (col.possibleValues && col.possibleValues.length > 0) {
-                        // Render Dropdown for columns with possibleValues
+                    } else if (Array.isArray(col.possibleValues) && col.possibleValues.length > 0) {
+                        // Render Dropdown for columns with predefined possible values
                         return (
                             <Dropdown
                                 value={options.value}
