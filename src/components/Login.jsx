@@ -26,23 +26,33 @@ export function Login() {
         body: JSON.stringify({ username }),
       });
 
-      const data = await response.json();
-      console.log("Response Status:", response.status);
-      console.log("API Response Data:", data);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error Response:", response.status, errorText);
+        alert("Login failed. Please check your credentials and try again.");
+        return;
+      }
 
-      // Check if the response is successful and the login is successful
-      if (response.ok && data.success) {
-        console.log("Login successful, navigating to /verifyOTP");
-        // Redirect to the verifyOTP page if the login is successful
-        navigate("/verifyOtp", { replace: true });
+      const data = await response.json();
+      console.log("Server Response:", data); // Log server response
+
+      if (data.success) {
+        // Mock user object based on the response (using username here as an example)
+        const user = { username }; // You can modify this as needed
+        console.log("Signing in with user:", user); // Log user data
+
+        auth.signin(user, () => {
+          navigate("/verifyOtp", { replace: true });
+        });
       } else {
         alert(data.message || "Authentication failed. Please try again.");
       }
     } catch (error) {
       console.error("Error verifying user:", error);
-      alert("An error occurred. Please try again later.");
+      alert("An error occurred while connecting to the server. Please try again.");
     }
   }
+
 
   return (
     <div className={styles.container}>

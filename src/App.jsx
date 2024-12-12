@@ -18,15 +18,15 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/verifyOtp" element={<VerifyOTP />} />
-        {/* <Route
+        {/* <Route path="/verifyOtp" element={<VerifyOTP />} /> */}
+        <Route
           path="/verifyOtp"
           element={
             <RequireAuth>
               <VerifyOTP />
             </RequireAuth>
           }
-        /> */}
+        />
         <Route path="/dynamic-table/:pageTitle" element={
           <RequireAuth>
             <DynamicTablesUI tenantName={tenantName} />
