@@ -43,9 +43,9 @@ export function VerifyOTP() {
                 verifyOtp(otp, (success) => {
                     if (success) {
                         // Navigate to dynamic page if OTP verified
-                        const pageTitle = "spin_new";  // You can make this dynamic if needed
-                        // navigate(`/dynamic-table/${pageTitle}`, { replace: true });
-                        navigate(`/`, { replace: true });
+                        const pageTitle = "player_new";  // You can make this dynamic if needed
+                        navigate(`/dynamic-table/${pageTitle}`, { replace: true });
+                        // navigate(`/`, { replace: true });
                     } else {
                         setError("Error verifying OTP. Please try again.");
                     }
