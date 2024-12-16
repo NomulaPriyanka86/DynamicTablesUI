@@ -47,37 +47,15 @@ export function useAuth() {
 export function RequireAuth({ children }) {
   let auth = useAuth();
   let location = useLocation();
-  if (!auth.user || !auth.otpVerified) {
-    // Redirect to login if there's no user
+  if (!auth.user) {
+    // Redirect unauthenticated users to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
-  // if (auth.user && !auth.otpVerified) {
-  //   // Redirect to OTP verification if user exists but OTP is not verified
-  //   return <Navigate to="/verifyOtp" state={{ from: location }} replace />;
-  // }
-  // Redirect to login if the user tries to access verifyOtp directly without being authenticated
-  if (!auth.user && location.pathname === "/verifyOtp") {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!auth.otpVerified && location.pathname !== "/verifyOtp") {
+    console.log("Redirecting to /verifyOtp");
+    return <Navigate to="/verifyOtp" state={{ from: location }} replace />;
   }
 
   return children;
 }
-
-// export function RequireOtpVerification({ children }) {
-//   let auth = useAuth();
-//   let location = useLocation();
-
-//   if (!auth.user) {
-//     // Redirect to login if there's no user
-//     return <Navigate to="/login" state={{ from: location }} replace />;
-//   }
-
-//   if (auth.user && auth.otpVerified) {
-//     // Redirect to home or dashboard if OTP is already verified
-//     return <Navigate to="/" state={{ from: location }} replace />;
-//   }
-
-//   return children;
-// }
 

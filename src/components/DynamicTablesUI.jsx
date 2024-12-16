@@ -14,6 +14,7 @@ import PageSchemas from './Pages/PageSchemas.jsx';
 import { useLocation, useParams } from 'react-router';
 import './dynamicTableUI.css';
 import { RowsPerPage } from './Pages/RowsPerPage.jsx';
+import LogOut from './LogOut.jsx';
 const DynamicTablesUI = ({ tenantName }) => {
     const [schema, setSchema] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -293,6 +294,7 @@ const DynamicTablesUI = ({ tenantName }) => {
                         resetSorting={resetSorting}
                         setDateRangeFilter={setDateRangeFilter}
                     />
+                    <LogOut />
                 </div>
             </div>
             <div className="layout">
