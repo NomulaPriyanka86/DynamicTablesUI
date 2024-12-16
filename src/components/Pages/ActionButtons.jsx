@@ -31,8 +31,12 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
             }
             if (dataRow.status !== formattedStatus) {
                 statusChanged = true;
+
+                // Create a copy of the row and remove the 'id' field
+                const { id, ...rowWithoutId } = dataRow;
+
                 return {
-                    ...dataRow,
+                    ...rowWithoutId,
                     status: formattedStatus, // Update the status with formatted value
                 };
             }
@@ -55,7 +59,7 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
         setFilteredData(updatedData);
         setData(updatedData);
         saveToLocalStorage('tableData', updatedData);
-
+        console.log(`updatedData: ${JSON.stringify(updatedData, null, 2)}`);
         // Now make the API requests
         try {
             const apiResponses = await Promise.all(

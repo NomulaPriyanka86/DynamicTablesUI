@@ -95,9 +95,8 @@ const DynamicTablesUI = ({ tenantName }) => {
                     newValue = 'Pending'; // Default to Pending
                 }
             }
-
-            // Create the updated row
             const updatedRow = { ...oldRow, [colName]: newValue };
+            delete updatedRow.id; // Exclude the 'id' field from the request body
 
             try {
                 const apiUrl = `http://localhost:8081/api/v1/page-data/${pageTitle}/info`;
