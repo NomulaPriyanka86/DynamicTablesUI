@@ -32,7 +32,7 @@ function App() {
             <DynamicTablesUI tenantName={tenantName} />
           </RequireAuth>
         } />
-        <Route path="/" element={
+        <Route path="/pageSchemas" element={
           <RequireAuth>
             <PageSchemas tenantName={tenantName} />
           </RequireAuth>
