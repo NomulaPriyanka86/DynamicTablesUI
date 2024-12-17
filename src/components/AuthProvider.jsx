@@ -11,25 +11,6 @@ export function AuthProvider({ children }) {
   const [otpVerified, setOtpVerified] = React.useState(false);
   const [isSessionExpired, setIsSessionExpired] = React.useState(false);
 
-  // **1. Check session data on initial load**
-  React.useEffect(() => {
-    const storedSession = localStorage.getItem("userSession");
-    if (storedSession) {
-      const { user: storedUser, expiry } = JSON.parse(storedSession);
-      const currentTime = new Date().getTime();
-
-      if (currentTime < expiry) {
-        setUser(storedUser);
-        setOtpVerified(true);
-        setIsSessionExpired(false);
-      } else {
-        localStorage.removeItem("userSession");
-        setIsSessionExpired(true);
-      }
-    }
-  }, []);
-
-  // **2. Session expiration check every second**
   React.useEffect(() => {
     const sessionInterval = setInterval(() => {
       const storedSession = localStorage.getItem("userSession");
@@ -49,30 +30,17 @@ export function AuthProvider({ children }) {
     return () => clearInterval(sessionInterval);
   }, []);
 
-  // **3. Sign in function**
+  // **Sign in function**
   const signin = (newUser, callback) => {
     return fakeAuthProvider.signin(() => {
-      // const now = new Date();
-      // const expiry = now.getTime() + SESSION_DURATION;
-
       setUser(newUser);
       setOtpVerified(false); // Reset OTP verification
       setIsSessionExpired(false);
-
-      // localStorage.setItem(
-      //   "userSession",
-      //   JSON.stringify({
-      //     user: newUser,
-      //     expiry,
-      //     loggedInAt: now.toISOString(),
-      //   })
-      // );
-
       callback();
     });
   };
 
-  // **4. Verify OTP function**
+  // **Verify OTP function**
   const verifyOtp = (otp, callback) => {
     return fakeAuthProvider.verifyOtp(otp, (success) => {
       if (success) {
@@ -97,7 +65,7 @@ export function AuthProvider({ children }) {
     });
   };
 
-  // **5. Sign out function**
+  // **Sign out function**
   const signout = (callback) => {
     return fakeAuthProvider.signout(() => {
       setUser(null);
