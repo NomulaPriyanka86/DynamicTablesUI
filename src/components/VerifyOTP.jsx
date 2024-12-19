@@ -21,7 +21,6 @@ export function VerifyOTP() {
             setError("Please enter the OTP.");
             return;
         }
-
         const mobileNumber = "9676000000";  // Hardcoded mobile number for testing
 
         try {
