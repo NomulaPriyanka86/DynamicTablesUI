@@ -27,6 +27,7 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
             if (dataRow.status === 'Rejected' && formattedStatus === 'Approved') {
                 toast.warning('Rejected items cannot be approved.');
                 allSuccess = false; // Mark as failure if any row is skipped
+                setSelectedRows([]); // Clear selected rows
                 return null; // Skip this row
             }
             if (dataRow.status !== formattedStatus) {
@@ -45,6 +46,7 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
 
         if (apiRequests.length === 0) {
             toast.info('No changes to update.');
+            setSelectedRows([]); // Clear selected rows
             return;
         }
 
@@ -122,6 +124,7 @@ const ActionButtons = ({ selectedRows, setSelectedRows, filteredData, setFiltere
         } catch (error) {
             console.error('Network or Server Error:', error);
             toast.error('An error occurred while updating the data.');
+            setSelectedRows([]); // Clear selected rows
         }
     };
 

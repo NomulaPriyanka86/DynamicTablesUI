@@ -12,6 +12,18 @@ export function AuthProvider({ children }) {
   const [isSessionExpired, setIsSessionExpired] = React.useState(false);
   const [loading, setLoading] = React.useState(true); // Loading state for initialization
 
+  const resetSessionExpiry = () => {
+    const now = new Date();
+    const expiry = now.getTime() + SESSION_DURATION;
+    const storedSession = localStorage.getItem("userSession");
+
+    if (storedSession) {
+      const sessionData = JSON.parse(storedSession);
+      sessionData.expiry = expiry;
+      localStorage.setItem("userSession", JSON.stringify(sessionData));
+    }
+  };
+
   React.useEffect(() => {
     const interval = setInterval(() => {
       const storedSession = localStorage.getItem("userSession");
@@ -66,6 +78,19 @@ export function AuthProvider({ children }) {
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  React.useEffect(() => {
+    const events = ["mousemove", "keydown", "click"];
+    const handleUserActivity = () => {
+      resetSessionExpiry();
+    };
+
+    events.forEach((event) => window.addEventListener(event, handleUserActivity));
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, handleUserActivity));
+    };
   }, []);
 
   // **Sign in function**
