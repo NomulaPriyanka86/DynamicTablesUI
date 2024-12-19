@@ -13,7 +13,6 @@ export function VerifyOTP() {
     const handleOTPChange = (event) => {
         setOtp(event.target.value);
     };
-
     // Handle OTP submission
     const handleSubmit = async (event) => {
         event.preventDefault();
